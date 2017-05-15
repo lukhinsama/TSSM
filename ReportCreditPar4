@@ -1,0 +1,19 @@
+<P><center><B>รายงานสรุปการเก็บเงิน</B></center></P>
+            <P><center><B> พนักงานเก็บเงิน : A20037 , 20101416  ไพรัช ชัยสินธุ์ ประจำวันที่ : 19 มี.ค. 2560 - 19 มี.ค. 2560 พิมพ์โดย : ไพรัช ชัยสินธุ์</B></center></P><table width = "100%">
+              <thead>
+              <tr>
+                <th style="text-align: center">ลำดับ</th>
+                <th style="text-align: center">ชื่อพนักงานเก็บเงิน</th>
+                <th style="text-align: center">รหัสเขตเก็บเงิน</th>
+                <th style="text-align: center">เลขที่ใบเสร็จ</th>
+                <th style="text-align: center">เวลาออกใบเสร็จ</th>
+                <th style="text-align: center">งวดที่</th>
+                <th style="text-align: center">เลขที่สัญญา</th>
+                <th style="text-align: center">ชื่อ - สกุล</th>
+                <th style="text-align: center">จำนวนเงิน</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+                <tfoot>
+                </tfoot>
+               </table>

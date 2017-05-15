@@ -1,0 +1,363 @@
+<B>รายงานการวิ่งงานรายทริป <B>ระหว่างวันที่ 21 มี.ค. 2560 - 20 เม.ย. 2560</B></B><table width = "100%">
+                <thead>
+                <tr>
+                  <td></td><td></td>
+                  <th style="text-align: center">ยอดการ์ด</th>
+                  <th style="text-align: center">การ์ดเก็บได้</th>
+                  <th style="text-align: center">การ์ดเก็บได้ %</th>
+                  <th style="text-align: center">การ์ดเก็บไม่ได้</th>
+                  <th style="text-align: center">การ์ดเก็บไม่ได้ %</th>
+                  <th style="text-align: center">ยอดใบเสร็จ</th>
+                  <th style="text-align: center">จำนวนเงินเก็บได้</th>
+                </tr>
+                </thead>
+                <tbody><tr>
+                        <td></td><td></td>
+                        <td style="text-align: center">18,618</td>
+                        <td style="text-align: center">4,185</td>
+                        <td style="text-align: center">22.48 %</td>
+                        <td style="text-align: center">14,433</td>
+                        <td style="text-align: center">77.52 %</td>
+                        <td style="text-align: center">4,224</td>
+                        <td style="text-align: right">4,812,670.00</td>
+                      </tr></tbody>
+            <tfoot>
+            </tfoot>
+           </table><BR><table width = "100%">
+                  <thead>
+                  <tr>
+                    <th style="text-align: center">เขต</th>
+                    <th style="text-align: center">ชื่อ - สกุล</th>
+                    <th style="text-align: center">ยอดการ์ด</th>
+                    <th style="text-align: center">การ์ดเก็บได้</th>
+                    <th style="text-align: center">การ์ดเก็บได้ %</th>
+                    <th style="text-align: center">การ์ดเก็บไม่ได้</th>
+                    <th style="text-align: center">การ์ดเก็บไม่ได้ %</th>
+                    <th style="text-align: center">ยอดใบเสร็จ</th>
+                    <th style="text-align: center">จำนวนเงินเก็บได้</th>
+                  </tr>
+                  </thead>
+                  <tbody><tr>
+                  <td style="text-align: center">70</td>
+                  <td>ปรกฤษณ์ รื่นเริงใจ</td>
+                  <td style="text-align: center">824</td>
+                  <td style="text-align: center">150</td>
+                  <td style="text-align: center">18.20 %</td>
+                  <td style="text-align: center">674</td>
+                  <td style="text-align: center">81.80 %</td>
+                  <td style="text-align: center">150</td>
+                  <td style="text-align: right">172,450.00</td>
+                </tr><tr>
+                  <td style="text-align: center">987</td>
+                  <td>พลวัฒน์ สุดทองคง</td>
+                  <td style="text-align: center">355</td>
+                  <td style="text-align: center">53</td>
+                  <td style="text-align: center">14.93 %</td>
+                  <td style="text-align: center">302</td>
+                  <td style="text-align: center">85.07 %</td>
+                  <td style="text-align: center">54</td>
+                  <td style="text-align: right">72,000.00</td>
+                </tr><tr>
+                  <td style="text-align: center">38</td>
+                  <td>พงษ์เทพ ลาพึง</td>
+                  <td style="text-align: center">522</td>
+                  <td style="text-align: center">82</td>
+                  <td style="text-align: center">15.71 %</td>
+                  <td style="text-align: center">440</td>
+                  <td style="text-align: center">84.29 %</td>
+                  <td style="text-align: center">82</td>
+                  <td style="text-align: right">79,900.00</td>
+                </tr><tr>
+                  <td style="text-align: center">83</td>
+                  <td>นฤพล แช่มเสือ</td>
+                  <td style="text-align: center">907</td>
+                  <td style="text-align: center">159</td>
+                  <td style="text-align: center">17.53 %</td>
+                  <td style="text-align: center">748</td>
+                  <td style="text-align: center">82.47 %</td>
+                  <td style="text-align: center">159</td>
+                  <td style="text-align: right">183,120.00</td>
+                </tr><tr>
+                  <td style="text-align: center">949</td>
+                  <td>สมศักดิ์ สังข์ทอง</td>
+                  <td style="text-align: center">506</td>
+                  <td style="text-align: center">108</td>
+                  <td style="text-align: center">21.34 %</td>
+                  <td style="text-align: center">398</td>
+                  <td style="text-align: center">78.66 %</td>
+                  <td style="text-align: center">110</td>
+                  <td style="text-align: right">132,990.00</td>
+                </tr><tr>
+                  <td style="text-align: center">985</td>
+                  <td>จีรวัฒน์ แซ่ตู้</td>
+                  <td style="text-align: center">452</td>
+                  <td style="text-align: center">88</td>
+                  <td style="text-align: center">19.47 %</td>
+                  <td style="text-align: center">364</td>
+                  <td style="text-align: center">80.53 %</td>
+                  <td style="text-align: center">88</td>
+                  <td style="text-align: right">111,220.00</td>
+                </tr><tr>
+                  <td style="text-align: center">50</td>
+                  <td>บัณฑิต อุดป่าคา</td>
+                  <td style="text-align: center">1113</td>
+                  <td style="text-align: center">269</td>
+                  <td style="text-align: center">24.17 %</td>
+                  <td style="text-align: center">844</td>
+                  <td style="text-align: center">75.83 %</td>
+                  <td style="text-align: center">270</td>
+                  <td style="text-align: right">310,760.00</td>
+                </tr><tr>
+                  <td style="text-align: center">39</td>
+                  <td>อนิรุทธิ์ จิตรโรจนรักษ์</td>
+                  <td style="text-align: center">588</td>
+                  <td style="text-align: center">180</td>
+                  <td style="text-align: center">30.61 %</td>
+                  <td style="text-align: center">408</td>
+                  <td style="text-align: center">69.39 %</td>
+                  <td style="text-align: center">180</td>
+                  <td style="text-align: right">211,040.00</td>
+                </tr><tr>
+                  <td style="text-align: center">920</td>
+                  <td>นิพล ทองเรือง</td>
+                  <td style="text-align: center">353</td>
+                  <td style="text-align: center">78</td>
+                  <td style="text-align: center">22.10 %</td>
+                  <td style="text-align: center">275</td>
+                  <td style="text-align: center">77.90 %</td>
+                  <td style="text-align: center">78</td>
+                  <td style="text-align: right">75,750.00</td>
+                </tr><tr>
+                  <td style="text-align: center">938</td>
+                  <td>เอกรินทร์ แป้นเถาว์</td>
+                  <td style="text-align: center">569</td>
+                  <td style="text-align: center">252</td>
+                  <td style="text-align: center">44.29 %</td>
+                  <td style="text-align: center">317</td>
+                  <td style="text-align: center">55.71 %</td>
+                  <td style="text-align: center">258</td>
+                  <td style="text-align: right">289,950.00</td>
+                </tr><tr>
+                  <td style="text-align: center">958</td>
+                  <td>ชัยธัช สันติปาตี</td>
+                  <td style="text-align: center">660</td>
+                  <td style="text-align: center">108</td>
+                  <td style="text-align: center">16.36 %</td>
+                  <td style="text-align: center">552</td>
+                  <td style="text-align: center">83.64 %</td>
+                  <td style="text-align: center">108</td>
+                  <td style="text-align: right">122,720.00</td>
+                </tr><tr>
+                  <td style="text-align: center">40</td>
+                  <td>สนธยา สอาดเอี่ยม</td>
+                  <td style="text-align: center">4</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00 %</td>
+                  <td style="text-align: center">4</td>
+                  <td style="text-align: center">100.00 %</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: right">0.00</td>
+                </tr><tr>
+                  <td style="text-align: center">932</td>
+                  <td>อนุวัฒน์ สุดทองคง</td>
+                  <td style="text-align: center">508</td>
+                  <td style="text-align: center">121</td>
+                  <td style="text-align: center">23.82 %</td>
+                  <td style="text-align: center">387</td>
+                  <td style="text-align: center">76.18 %</td>
+                  <td style="text-align: center">121</td>
+                  <td style="text-align: right">130,820.00</td>
+                </tr><tr>
+                  <td style="text-align: center">941</td>
+                  <td>ฉันทัศ สุดทองคง</td>
+                  <td style="text-align: center">470</td>
+                  <td style="text-align: center">106</td>
+                  <td style="text-align: center">22.55 %</td>
+                  <td style="text-align: center">364</td>
+                  <td style="text-align: center">77.45 %</td>
+                  <td style="text-align: center">108</td>
+                  <td style="text-align: right">124,160.00</td>
+                </tr><tr>
+                  <td style="text-align: center">30</td>
+                  <td>ถาวร สมานเพ็ชร</td>
+                  <td style="text-align: center">757</td>
+                  <td style="text-align: center">258</td>
+                  <td style="text-align: center">34.08 %</td>
+                  <td style="text-align: center">499</td>
+                  <td style="text-align: center">65.92 %</td>
+                  <td style="text-align: center">259</td>
+                  <td style="text-align: right">304,550.00</td>
+                </tr><tr>
+                  <td style="text-align: center">76</td>
+                  <td>เสกสรรค์ เสงี่ยมงาม</td>
+                  <td style="text-align: center">3</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: center">0.00 %</td>
+                  <td style="text-align: center">3</td>
+                  <td style="text-align: center">100.00 %</td>
+                  <td style="text-align: center">0</td>
+                  <td style="text-align: right">0.00</td>
+                </tr><tr>
+                  <td style="text-align: center">7</td>
+                  <td>ศุภโชค สถิรลีลา</td>
+                  <td style="text-align: center">609</td>
+                  <td style="text-align: center">114</td>
+                  <td style="text-align: center">18.72 %</td>
+                  <td style="text-align: center">495</td>
+                  <td style="text-align: center">81.28 %</td>
+                  <td style="text-align: center">115</td>
+                  <td style="text-align: right">134,920.00</td>
+                </tr><tr>
+                  <td style="text-align: center">911</td>
+                  <td>เกียรติศักดิ์ เพ็ชรนิล</td>
+                  <td style="text-align: center">465</td>
+                  <td style="text-align: center">67</td>
+                  <td style="text-align: center">14.41 %</td>
+                  <td style="text-align: center">398</td>
+                  <td style="text-align: center">85.59 %</td>
+                  <td style="text-align: center">67</td>
+                  <td style="text-align: right">71,070.00</td>
+                </tr><tr>
+                  <td style="text-align: center">936</td>
+                  <td>พิพัฒน์ มะกะคุต</td>
+                  <td style="text-align: center">620</td>
+                  <td style="text-align: center">105</td>
+                  <td style="text-align: center">16.94 %</td>
+                  <td style="text-align: center">515</td>
+                  <td style="text-align: center">83.06 %</td>
+                  <td style="text-align: center">105</td>
+                  <td style="text-align: right">110,220.00</td>
+                </tr><tr>
+                  <td style="text-align: center">979</td>
+                  <td>สุรเชษฐ์ ศีลบุตร</td>
+                  <td style="text-align: center">148</td>
+                  <td style="text-align: center">44</td>
+                  <td style="text-align: center">29.73 %</td>
+                  <td style="text-align: center">104</td>
+                  <td style="text-align: center">70.27 %</td>
+                  <td style="text-align: center">44</td>
+                  <td style="text-align: right">43,710.00</td>
+                </tr><tr>
+                  <td style="text-align: center">20</td>
+                  <td>วรายุ มณีพร้าว</td>
+                  <td style="text-align: center">997</td>
+                  <td style="text-align: center">155</td>
+                  <td style="text-align: center">15.55 %</td>
+                  <td style="text-align: center">842</td>
+                  <td style="text-align: center">84.45 %</td>
+                  <td style="text-align: center">156</td>
+                  <td style="text-align: right">182,790.00</td>
+                </tr><tr>
+                  <td style="text-align: center">32</td>
+                  <td>มนัส แซ่เหลี่ยว</td>
+                  <td style="text-align: center">860</td>
+                  <td style="text-align: center">157</td>
+                  <td style="text-align: center">18.26 %</td>
+                  <td style="text-align: center">703</td>
+                  <td style="text-align: center">81.74 %</td>
+                  <td style="text-align: center">159</td>
+                  <td style="text-align: right">184,030.00</td>
+                </tr><tr>
+                  <td style="text-align: center">47</td>
+                  <td>วิชาญ เงินถาวร</td>
+                  <td style="text-align: center">786</td>
+                  <td style="text-align: center">139</td>
+                  <td style="text-align: center">17.68 %</td>
+                  <td style="text-align: center">647</td>
+                  <td style="text-align: center">82.32 %</td>
+                  <td style="text-align: center">141</td>
+                  <td style="text-align: right">160,330.00</td>
+                </tr><tr>
+                  <td style="text-align: center">905</td>
+                  <td>เมืองอุทัย ธานี</td>
+                  <td style="text-align: center">525</td>
+                  <td style="text-align: center">194</td>
+                  <td style="text-align: center">36.95 %</td>
+                  <td style="text-align: center">331</td>
+                  <td style="text-align: center">63.05 %</td>
+                  <td style="text-align: center">198</td>
+                  <td style="text-align: right">210,290.00</td>
+                </tr><tr>
+                  <td style="text-align: center">922</td>
+                  <td>กฤษณพงศ์ วุ้นเนียม</td>
+                  <td style="text-align: center">348</td>
+                  <td style="text-align: center">136</td>
+                  <td style="text-align: center">39.08 %</td>
+                  <td style="text-align: center">212</td>
+                  <td style="text-align: center">60.92 %</td>
+                  <td style="text-align: center">137</td>
+                  <td style="text-align: right">146,350.00</td>
+                </tr><tr>
+                  <td style="text-align: center">963</td>
+                  <td>สราวุธ อมรวิทยากิจ</td>
+                  <td style="text-align: center">522</td>
+                  <td style="text-align: center">96</td>
+                  <td style="text-align: center">18.39 %</td>
+                  <td style="text-align: center">426</td>
+                  <td style="text-align: center">81.61 %</td>
+                  <td style="text-align: center">96</td>
+                  <td style="text-align: right">90,920.00</td>
+                </tr><tr>
+                  <td style="text-align: center">84</td>
+                  <td>ชัยมงคล คีรีวงษ์</td>
+                  <td style="text-align: center">747</td>
+                  <td style="text-align: center">159</td>
+                  <td style="text-align: center">21.29 %</td>
+                  <td style="text-align: center">588</td>
+                  <td style="text-align: center">78.71 %</td>
+                  <td style="text-align: center">162</td>
+                  <td style="text-align: right">193,230.00</td>
+                </tr><tr>
+                  <td style="text-align: center">49</td>
+                  <td>สวัสเทพ พันธุ์ใหม่</td>
+                  <td style="text-align: center">655</td>
+                  <td style="text-align: center">148</td>
+                  <td style="text-align: center">22.60 %</td>
+                  <td style="text-align: center">507</td>
+                  <td style="text-align: center">77.40 %</td>
+                  <td style="text-align: center">153</td>
+                  <td style="text-align: right">190,090.00</td>
+                </tr><tr>
+                  <td style="text-align: center">57</td>
+                  <td>อมรสุรพันธ์ นพวงศ์ ณ อยุธยา</td>
+                  <td style="text-align: center">963</td>
+                  <td style="text-align: center">212</td>
+                  <td style="text-align: center">22.01 %</td>
+                  <td style="text-align: center">751</td>
+                  <td style="text-align: center">77.99 %</td>
+                  <td style="text-align: center">214</td>
+                  <td style="text-align: right">243,440.00</td>
+                </tr><tr>
+                  <td style="text-align: center">73</td>
+                  <td>วิโรจน์ อุดป่าคา</td>
+                  <td style="text-align: center">586</td>
+                  <td style="text-align: center">109</td>
+                  <td style="text-align: center">18.60 %</td>
+                  <td style="text-align: center">477</td>
+                  <td style="text-align: center">81.40 %</td>
+                  <td style="text-align: center">110</td>
+                  <td style="text-align: right">137,710.00</td>
+                </tr><tr>
+                  <td style="text-align: center">945</td>
+                  <td>วิทยา คุ้มเอียด</td>
+                  <td style="text-align: center">661</td>
+                  <td style="text-align: center">271</td>
+                  <td style="text-align: center">41.00 %</td>
+                  <td style="text-align: center">390</td>
+                  <td style="text-align: center">59.00 %</td>
+                  <td style="text-align: center">272</td>
+                  <td style="text-align: right">325,160.00</td>
+                </tr><tr>
+                  <td style="text-align: center">954</td>
+                  <td>ณัฐฐากาญจน์ สิริจงวัฒนา</td>
+                  <td style="text-align: center">535</td>
+                  <td style="text-align: center">67</td>
+                  <td style="text-align: center">12.52 %</td>
+                  <td style="text-align: center">468</td>
+                  <td style="text-align: center">87.48 %</td>
+                  <td style="text-align: center">70</td>
+                  <td style="text-align: right">66,980.00</td>
+                </tr></tbody>
+              <tfoot>
+              </tfoot>
+             </table>

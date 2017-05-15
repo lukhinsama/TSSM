@@ -1,0 +1,49 @@
+<P><center><B>รายงานยกเลิกใบเสร็จรายบุคคล </B></center></P>
+          <P><center><B> พนักงานเก็บเงิน : 0 ,  ประจำวันที่ : 27 มี.ค. 2560 - 27 มี.ค. 2560 พิมพ์โดย : อภิญญา  กุศลชีวิน</B></center></P><table width = "100%">
+              <thead>
+              <tr>
+                <th style="text-align: center">ลำดับ</th>
+                <th style="text-align: center">เลขที่ใบเสร็จ</th>
+                <th style="text-align: center">วันที่ออกใบเสร็จ</th>
+                <th style="text-align: center">วันที่ยกเลิก</th>
+                <th style="text-align: center">งวดที่</th>
+                <th style="text-align: center">เลขที่สัญญา</th>
+                <th style="text-align: center">ชื่อ - สกุล</th>
+                <th style="text-align: center">จำนวนเงิน</th>
+                <th style="text-align: center">ชื่อพนักงานเก็บเงิน</th>
+              </tr>
+              </thead>
+              <tbody><tr>
+                  <td style="text-align: center">1</td>
+                  <td>#2GAAA-09960030004</td>
+                  <td style="text-align: center">25 มี.ค. 2560 15:30 น.</td>
+                  <td style="text-align: center">27 มี.ค. 2560 08:56 น.</td>
+                  <td style="text-align: center">1</td>
+                  <td style="text-align: center">600015792</td>
+                  <td>พล  กลํ่ากูล</td>
+                  <td style="text-align: right">0.00</td>
+                  <td></td>
+                </tr><tr>
+                  <td style="text-align: center">2</td>
+                  <td>#2GAAA-09960030014</td>
+                  <td style="text-align: center">25 มี.ค. 2560 09:03 น.</td>
+                  <td style="text-align: center">27 มี.ค. 2560 11:48 น.</td>
+                  <td style="text-align: center">1</td>
+                  <td style="text-align: center">70076651</td>
+                  <td>พล  กลํ่ากูล</td>
+                  <td style="text-align: right">0.00</td>
+                  <td></td>
+                </tr><tr>
+                  <td style="text-align: center">3</td>
+                  <td>#2GAAE-03460030033</td>
+                  <td style="text-align: center">27 มี.ค. 2560 09:48 น.</td>
+                  <td style="text-align: center">27 มี.ค. 2560 09:51 น.</td>
+                  <td style="text-align: center">1</td>
+                  <td style="text-align: center">70076845</td>
+                  <td>ยุทธ อิ่มพร้อม</td>
+                  <td style="text-align: right">0.00</td>
+                  <td></td>
+                </tr></tbody>
+                <tfoot>
+                </tfoot>
+               </table>
