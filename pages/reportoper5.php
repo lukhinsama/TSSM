@@ -200,6 +200,7 @@ if (!empty($_REQUEST['sortcontno'])) {
                 <th style="text-align: center">เลขที่สัญญา</th>
                 <th style="text-align: center">ชื่อ - สกุล</th>
                 <th style="text-align: center">จำนวนเงิน</th>
+                <th style="text-align: center">พิมพ์ใบเสร็จ</th>
               </tr>
             </thead>
             <tbody>
@@ -216,27 +217,45 @@ if (!empty($_REQUEST['sortcontno'])) {
                 <th style=\"text-align: center\">ชื่อ - สกุล</th>
                 <th style=\"text-align: center\">จำนวนเงิน</th>
                 <th style=\"text-align: center\">ชื่อพนักงานเก็บเงิน</th>
+                <th style=\"text-align: center\">พิมพ์ใบเสร็จ</th>
               </tr>
               </thead>
               <tbody>";
                 $httpExcel2 = "";
 
-              $sql_select = "SELECT $top row_number() OVER (ORDER BY R.ReceiptCode ASC) AS rownum,R.ReceiptCode,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate  ,CONVERT(varchar(20),RV.LastUpdateDate,105) +' '+ CONVERT(varchar(5),RV.LastUpdateDate,108) as LastUpdateDate ,case when count(R.ReceiptCode) = 1 then convert(varchar,min(S.PaymentPeriodNumber)) else convert(varchar,min(S.PaymentPeriodNumber)) end as PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,Sy.Amount AS PAYAMT,R.TotalPayment AS PAYAMTS  ,Em.EmpID,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , Ed.FirstName + ' ' + Ed.LastName AS Names";
+              $sql_select = "SELECT $top row_number() OVER (ORDER BY R.ReceiptCode ASC) AS rownum, R.CreateBy AS EmpID, Ed.FirstName + ' ' + Ed.LastName AS Names , CONVERT(varchar,R.DatePayment,105) AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , 'รายงานยกเลิกใบเสร็จรายบุคคล'
+              AS printHead
+              ,R.ReceiptCode,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate  ,CONVERT(varchar(20),RV.LastUpdateDate,105) +' '+ CONVERT(varchar(5),RV.LastUpdateDate,108) as LastUpdateDate ,case when count(R.ReceiptCode) = 1 then convert(varchar,min(S.PaymentPeriodNumber))
+              else convert(varchar,min(S.PaymentPeriodNumber)) end as PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,Sy.Amount AS PAYAMT,R.TotalPayment AS PAYAMTS  ,Em.EmpID,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , Ed.FirstName + ' ' + Ed.LastName AS Names
+              ,ISNULL(MAX(PrintOrder),0) AS PrintOrder";
 
-              $sql_body = " FROM TSRDATA_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) LEFT JOIN Bighead_Mobile.dbo.ReceiptVoid AS RV ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.LastUpdateBy = EM.EmpID LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' AND Ed.SaleCode is not null WHERE $WHERE  AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0 GROUP BY R.ReceiptCode,R.DatePayment,c.CONTNO,CustomerName,Sy.Amount,R.TotalPayment,Em.EmpID,ed.SaleCode,Ed.FirstName,Ed.LastName,R.ZoneCode,RV.LastUpdateDate $sort";
+              $sql_body = " FROM TSRDATA_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) LEFT JOIN Bighead_Mobile.dbo.ReceiptVoid AS RV ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo
+              LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID
+              LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID
+              LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.LastUpdateBy = EM.EmpID
+              LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' AND Ed.SaleCode is not null
+              LEFT JOIN Bighead_Mobile.dbo.DocumentHistory AS DH ON DH.DocumentNumber = R.ReceiptID WHERE $WHERE  AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0 GROUP BY R.CreateBy, R.ReceiptCode,R.DatePayment,c.CONTNO,CustomerName,Sy.Amount,R.TotalPayment,Em.EmpID,ed.SaleCode,Ed.FirstName,Ed.LastName
+              ,R.ZoneCode,RV.LastUpdateDate,DH.PrintOrder  $sort";
 
               $sql_print = "SELECT DISTINCT R.ReceiptCode
               ,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate
               ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,R.TotalPayment AS PAYAMT
-              ,ISNULL ((select SendAmount from [Bighead_Mobile].[dbo].SendMoney  WHERE SaveTransactionNoDate is not null  AND CreateBy = em.EmpID AND SaveTransactionNoDate BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59' ),0) as Sendmoney, R.CreateBy AS EmpID, Ed.FirstName + ' ' + Ed.LastName AS Names , CONVERT(varchar,R.DatePayment,105) AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName ,Em.EmpID,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , 'รายงานยกเลิกใบเสร็จรายบุคคล' AS printHead";
+              ,ISNULL ((select SendAmount from [Bighead_Mobile].[dbo].SendMoney  WHERE SaveTransactionNoDate is not null  AND CreateBy = em.EmpID AND SaveTransactionNoDate BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59' ),0) as Sendmoney, R.CreateBy AS EmpID, Ed.FirstName + ' ' + Ed.LastName AS Names , CONVERT(varchar,R.DatePayment,105) AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName ,Em.EmpID,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , 'รายงานยกเลิกใบเสร็จรายบุคคล' AS printHead";
 
-              $sql_body_print = " FROM Bighead_Mobile.dbo.vw_ReceiptWithZone AS R LEFT JOIN Bighead_Mobile.dbo.ReceiptVoid AS RV ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.CreateBy = EM.EmpID LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' AND Ed.SaleCode is not null WHERE $WHERE  AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0  $sort";
+              $sql_body_print = " FROM TSRData_Source.dbo.vw_ReceiptWithZone AS R LEFT JOIN Bighead_Mobile.dbo.ReceiptVoid AS RV ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo
+              LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID
+              LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID
+              LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID
+              LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.CreateBy = EM.EmpID
+              LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' AND Ed.SaleCode is not null
+              WHERE $WHERE  AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0  $sort";
 
 
 
               $sql_case = $sql_select." ".$sql_body;
 
-              $sql_print = $sql_print." ".$sql_body_print;
+              //$sql_print = $sql_print." ".$sql_body_print;
+              $sql_print = $sql_case;
 
               //echo $sql_case;
               //echo $sql_print;
@@ -276,6 +295,7 @@ if (!empty($_REQUEST['sortcontno'])) {
                   <td>".$row['CustomerName']."</td>
                   <td style=\"text-align: right\">".number_format($row['PAYAMT'],2)."</td>
                   <td>".$row['Names']."</td>
+                  <td>".$row['PrintOrder']."</td>
                 </tr>";
 
               ?>
@@ -289,6 +309,7 @@ if (!empty($_REQUEST['sortcontno'])) {
                 <td style="text-align: center"><?=$row['CONTNO']?></td>
                 <td><?=$row['CustomerName']?></td>
                 <td style="text-align: right"><?=number_format($row['PAYAMT'],2)?></td>
+                <td style="text-align: center"><?=$row['PrintOrder']?></td>
               </tr>
 
               <?php

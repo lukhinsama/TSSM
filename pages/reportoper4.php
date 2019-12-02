@@ -176,9 +176,9 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
 
              $conn = connectDB_BigHead();
 
-             $sql_case = "SELECT row_number() OVER (ORDER BY CCode ASC) AS rownum , CCode ,Name,sum(Ref) AS Ref,COUNT(RefNO) AS RefNO,SUM(PAYAMT) AS PAYAMT , '".$searchDate."' as printdate ,'".$teamcode[1]."' AS TeamCode, 'รายงานสรุปการยกเลิกใบเสร็จ' AS printHead
-             FROM (SELECT CCode,Name,COUNT(RefNO) AS Ref,SUM(PAYAMT) as PAYAMT ,RefNO FROM (SELECT p.ZoneCode AS CCode,emd.EmployeeName AS Name,P.TotalPayment AS PAYAMT,P.DatePayment AS PayDate,P.RefNO,Rv.LastUpdateDate
-             FROM TSRDATA_Source.dbo.vw_ReceiptWithZone AS P INNER JOIN [Bighead_Mobile].[dbo].[ReceiptVoid] AS RV ON P.ReceiptID = RV.ReceiptID LEFT JOIN [Bighead_Mobile].[dbo].[EmployeeDetail] AS Emd ON P.LastUpdateBy = Emd.EmployeeCode WHERE P.TotalPayment = 0 $WHERE ) as a GROUP BY CCode,Name,RefNO) as b  GROUP BY CCode,Name";
+             $sql_case = "SELECT row_number() OVER (ORDER BY CCode ASC) AS rownum , CCode ,Name,sum(Ref) AS Ref,COUNT(RefNO) AS RefNO,SUM(PAYAMT) AS PAYAMT , '".$searchDate."' as printdate ,'".$teamcode[1]."' AS TeamCode, 'รายงานสรุปการยกเลิกใบเสร็จ' AS printHead,empid
+             FROM (SELECT CCode,Name,COUNT(RefNO) AS Ref,SUM(PAYAMT) as PAYAMT ,RefNO,empid FROM (SELECT p.ZoneCode AS CCode,emd.EmployeeName AS Name,P.TotalPayment AS PAYAMT,P.DatePayment AS PayDate,P.RefNO,Rv.LastUpdateDate,Emd.EmployeeCode AS Empid
+             FROM TSRDATA_Source.dbo.vw_ReceiptWithZone AS P INNER JOIN [Bighead_Mobile].[dbo].[ReceiptVoid] AS RV ON P.ReceiptID = RV.ReceiptID LEFT JOIN [Bighead_Mobile].[dbo].[EmployeeDetail] AS Emd ON P.LastUpdateBy = Emd.EmployeeCode WHERE P.TotalPayment = 0 $WHERE ) as a GROUP BY CCode,Name,RefNO,empid) as b  GROUP BY CCode,Name,empid";
 
              if (($_COOKIE['tsr_emp_permit'] != 4 )) {
            ?>

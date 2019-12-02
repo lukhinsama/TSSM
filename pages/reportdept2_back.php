@@ -41,8 +41,25 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
   if (substr($_COOKIE['tsr_emp_id'],0,1) == "0") {
     $EmpID['0'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
     $EmpID['1'] = $_COOKIE['tsr_emp_name'];
-
+  }else {
+    $EmpID['0'] = $_COOKIE['tsr_emp_id'];
+    $EmpID['1'] = $_COOKIE['tsr_emp_name'];
+    }
     $connss = connectDB_BigHead();
+
+    $SQl = "SELECT case when EmployeeCode = TeamHeadCode THEN TeamCode WHEN EmployeeCode = DepartmentHeadCode THEN Departmentcode ELSE EmployeeCode END AS valueText ,case when EmployeeCode = TeamHeadCode THEN 'TeamCode' WHEN EmployeeCode = DepartmentHeadCode THEN 'DepartmentCode' ELSE 'EmployeeCode' END AS statusText  FROM Bighead_Mobile.dbo.EmployeeDetail WHERE PositionCode = 'dept' AND EmployeeCode = '".$EmpID['0']."'";
+    $stmt = sqlsrv_query($connss,$SQl);
+    while ($r = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
+      if ($r['statusText'] == 'TeamCode') {
+       $WHERE .= " AND Em.TeamCode = '".$r['valueText']."'";
+     }elseif ($r['statusText'] == 'DepartmentCode') {
+       $WHERE .= " AND Em.DepartmentCode = '".$r['valueText']."'";
+     }else {
+       $WHERE .= " AND Em.EmployeeCode = '".$r['valueText']."'";
+     }
+    }
+
+
     $sql_Empid = "SELECT SaleCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE EmployeeCode = '".$EmpID['0']."' AND salecode is not null";
 
     //echo $sql_Empid;
@@ -53,11 +70,7 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
     }
 
     sqlsrv_close($connss);
-
-    $WHERE .= " AND R.ZoneCode = '".$EmpID['2']."'";
-
-
-  }
+    //$WHERE .= " AND R.ZoneCode = '".$EmpID['2']."'";
 }else {
   if (empty($_REQUEST['EmpID'])) {
     $EmpID = array('0','-');
@@ -246,6 +259,7 @@ if (!empty($_REQUEST['sortcontno'])) {
                 <th style=\"text-align: center\">เลขที่ใบเสร็จ</th>
                 <th style=\"text-align: center\">เวลาออกใบเสร็จ</th>
                 <th style=\"text-align: center\">งวดที่</th>
+                <th style=\"text-align: center\">เลขที่อ้างอิง</th>
                 <th style=\"text-align: center\">เลขที่สัญญา</th>
                 <th style=\"text-align: center\">ชื่อ - สกุล</th>
                 <th style=\"text-align: center\">จำนวนเงิน</th>
@@ -280,6 +294,7 @@ if (!empty($_REQUEST['sortcontno'])) {
               ,CONVERT(varchar,PaymentDueDate) as PaymentDueDate
               ,case when count(ReceiptCode) = 1 then convert(varchar,min(PaymentPeriodNumber)) else convert(varchar,min(PaymentPeriodNumber)) + ' - ' + convert(varchar,Max(PaymentPeriodNumber)) end as PaymentPeriodNumber
               ,CONTNO
+              ,ContractReferenceNo
               ,CustomerName
               ,case when count(ReceiptCode) = 1 then SUM(PAYAMT) else SUM(PAYAMT) end as PAYAMT
               ,case when count(ReceiptCode) = 1 then SUM(PAYAMT) else SUM(PAYAMT) end as PAYAMTS
@@ -291,12 +306,12 @@ if (!empty($_REQUEST['sortcontno'])) {
               , 'รายงานสรุปการเก็บเงิน' AS printHead
               from (SELECT DISTINCT ReceiptCode
               ,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate
-              ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,Sy.Amount AS PAYAMT
+              ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.ContractReferenceNo,c.CONTNO AS CONTNO,CustomerName,Sy.Amount AS PAYAMT
               , Em.FirstName + ' ' + Em.LastName AS Names , '".$searchDate."' AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName,R.CreateBy as EmpID,R.ZoneCode as SaleCode ";
 
 
               $sql_body = " FROM TSRData_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) LEFT JOIN Bighead_Mobile.dbo.Contract AS C WITH(NOLOCK) ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC WITH(NOLOCK) ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy WITH(NOLOCK) ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S WITH(NOLOCK) ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Em WITH(NOLOCK) ON R.LastUpdateBy = EM.EmployeeCode WHERE $WHERE AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount > 0 AND PositionCode LIKE 'dept%'
-              ) as result GROUP BY ReceiptCode,PaymentDueDate,CONTNO,CustomerName,EmpID,SaleCode,Names,Paydate,PrintName ORDER BY ReceiptCode";
+              ) as result GROUP BY ReceiptCode,PaymentDueDate,CONTNO,ContractReferenceNo,CustomerName,EmpID,SaleCode,Names,Paydate,PrintName ORDER BY ReceiptCode";
 
 
               /*
@@ -363,6 +378,7 @@ if (!empty($_REQUEST['sortcontno'])) {
                   <td>#".$row['ReceiptCode']."</td>
                   <td style=\"text-align: center\">".DateTimeThai($row['PaymentDueDate'])." น.</td>
                   <td style=\"text-align: center\">".$row['PaymentPeriodNumber']."</td>
+                  <td style=\"text-align: center\">".$row['ContractReferenceNo']."</td>
                   <td style=\"text-align: center\">".$row['CONTNO']."</td>
                   <td>".$row['CustomerName']."</td>
                   <td style=\"text-align: right\">".number_format($row['PAYAMT'],2)."</td>

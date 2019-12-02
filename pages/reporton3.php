@@ -1,6 +1,6 @@
 <?php
-ini_set('display_errors', 'on');
-ini_set('error_reporting', E_ALL);
+//ini_set('display_errors', 'on');
+//ini_set('error_reporting', E_ALL);
 
 
 if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
@@ -16,40 +16,21 @@ if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
 if (!empty($_REQUEST['EmpID'])) {
 
   if ($_REQUEST['EmpID'] == "7") {
-    if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6) || ($_COOKIE['tsr_emp_permit'] == 13)) {
-      //$_REQUEST['EmpID'] = "A00098";
-      if(DateEng($_REQUEST['startDate']) > '2018-06-05' ){
-        $_REQUEST['EmpID'] = "A00094";
-      }else {
-        $_REQUEST['EmpID'] = "A00098";
-      }
+    if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6)) {
+      $_REQUEST['EmpID'] = "A40031";
     }else {
       $_REQUEST['EmpID'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
     }
   }
-      $WHERE1 = "AND ((C.salecode IN
-        (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_all]
-          WHERE StatusType = 'sale' AND (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')
-           UNION ALL SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_ALL_BACKUP_20180604]
-           WHERE StatusType = 'sale' AND (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."'
-             OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."'
-             OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')))
-      OR (C.PreSaleEmployeeCode IN
-        (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_all]
-          WHERE StatusType = 'sale' AND (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')
-        UNION ALL SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_ALL_BACKUP_20180604]
-        WHERE StatusType = 'sale' AND (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."'
-          OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."'
-          OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."'
-          OR ParentEmployeeCode = '".$_REQUEST['EmpID']."'))))";
+    $WHERE1 = "AND C.salecode IN (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_ALL]  WHERE StatusType = 'on' AND (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."'))";
 }else {
     //$_REQUEST['EmpID'] = "A00098";
-    if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6) || ($_COOKIE['tsr_emp_permit'] == 13)) {
-      $_REQUEST['EmpID'] = "A00098";
+    if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6)) {
+      $_REQUEST['EmpID'] = "A40031";
     }else {
       $_REQUEST['EmpID'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
     }
-    $WHERE1 = "AND C.salecode IN (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent]  WHERE (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."') )";
+    $WHERE1 = "AND C.salecode IN (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_ALL]  WHERE StatusType = 'on' AND (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."') )";
 }
   $conn = connectDB_BigHead();
  ?>
@@ -58,7 +39,7 @@ if (!empty($_REQUEST['EmpID'])) {
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="row">
-        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportsale5_test">
+        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reporton3">
         <div class="col-md-2">
           <h4>
             รายงานติดตั้ง
@@ -68,11 +49,11 @@ if (!empty($_REQUEST['EmpID'])) {
           <div class="form-group group-sm">
 
               <?PHP
-              if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6)  || ($_COOKIE['tsr_emp_permit'] == 13)) {
+              if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6)) {
                 $level = 6 ;
               }else {
                 //$EmpID['0'] = "A06797";
-                $sql_case = "SELECT TOP 1 PositionLevel FROM [Bighead_Mobile].[dbo].[Position] WHERE PositionID in (SELECT PositionCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE (EmployeeCode = 'A".substr($_COOKIE['tsr_emp_id'],1,5)."') AND ProcessType = 'Sale') ORDER BY PositionLevel DESC";
+                $sql_case = "SELECT TOP 1 PositionLevel FROM [Bighead_Mobile].[dbo].[Position] WHERE PositionID in (SELECT PositionCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE (EmployeeCode = 'A".substr($_COOKIE['tsr_emp_id'],1,5)."') AND ProcessType = 'on')  ORDER BY PositionLevel DESC";
 
                 //echo $sql_case;
                 $stmt = sqlsrv_query($conn,$sql_case);
@@ -163,10 +144,9 @@ if (!empty($_REQUEST['EmpID'])) {
         </div>
 
         <div class="col-md-1">
-          <?php
-          echo PrintButton($_COOKIE['tsr_emp_id'],'11','7',$_COOKIE['tsr_emp_permit']);
-          ?>
-          <!--<a href="http://app.thiensurat.co.th/lkh/rpt.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=11&rpt=7" target="_blank" class="btn btn-default"> <i class="fa fa-print"></i> </a>-->
+
+          <a href="http://app.thiensurat.co.th/lkh/rpt.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=11&rpt=7" target="_blank" class="btn btn-default"> <i class="fa fa-print"></i> </a>
+
         </div>
         </form>
       </div>
@@ -190,7 +170,7 @@ if (!empty($_REQUEST['EmpID'])) {
 
             <?php
             $httpExcelHead = "<P><center><B>รายงานสรุปการเก็บเงิน</B></center></P>
-          <P><center><B> ประจำวันที่ : ".$searchDate." พิมพ์โดย : ".$_COOKIE['tsr_emp_name']."</B></center></P>";
+          <P><center><B> พนักงานเก็บเงิน : ".$EmpID['0']." , ".$EmpID['2']." ประจำวันที่ : ".$searchDate." พิมพ์โดย : ".$_COOKIE['tsr_emp_name']."</B></center></P>";
 
              ?>
 
@@ -206,7 +186,7 @@ if (!empty($_REQUEST['EmpID'])) {
                 <th style="text-align: center">วันที่ติดตั้ง</th>
                 <th style="text-align: center">พนักงานขาย</th>
                 <th style="text-align: center">ผู้แนะนำ</th>
-                <th style="text-align: center">รหัสทีม</th>
+                <th style="text-align: center">ทีม</th>
                 <th style="text-align: center">สินค้า</th>
                 <th style="text-align: center">ชื่อลูกค้า</th>
                 <th style="text-align: center">ราคาขาย</th>
@@ -253,9 +233,6 @@ if (!empty($_REQUEST['EmpID'])) {
             <tbody>";
                 $httpExcel2 = "";
 
-                $orderbyTime = "ORDER BY C.EFFDATE,C.REFNO ASC";
-                $orderbysalecode = "ORDER BY C.SaleCode,C.ContractReferenceNo ASC";
-
               $sql_select = "SELECT C.ContractReferenceNo as Refno
               ,C.CONTNO as CONTNO
               ,C.Refno AS RefNoR,c.CONTNO As CONTNOR
@@ -268,11 +245,11 @@ if (!empty($_REQUEST['EmpID'])) {
   ,(SELECT PaymentAmount FROM [Bighead_Mobile].[dbo].[PackagePeriodDetail] where model = c.Model AND paymentperiodnumber = 1) - tradeindiscount AS FirstPaymentPeriod
   ,(SELECT PaymentAmount FROM [Bighead_Mobile].[dbo].[PackagePeriodDetail] where model = c.Model AND paymentperiodnumber = 2) AS PaymentPeriod
   ,DC.PrefixName,DC.CustomerName,DC.IDCard
-  ,(SELECT top 1 AddressString FROM [Bighead_Mobile].[dbo].[vw_GetAddress] WHERE AddressTypeCode = 'AddressInstall' AND refno = C.refno) AS AddressInstall
- ,REPLACE(REPLACE((SELECT top 1 [TelHome] + ' , ' + [TelMobile] + ' , ' + [TelOffice] FROM [Bighead_Mobile].[dbo].[vw_GetAddress] WHERE AddressTypeCode = 'AddressInstall' AND refno = C.refno),', -',''),'- ,','') AS AddressInstallTel
- ,(SELECT top 1 AddressString FROM [Bighead_Mobile].[dbo].[vw_GetAddress] WHERE AddressTypeCode = 'AddressPayment' AND refno = C.refno) AS AddressPayment
- ,REPLACE(REPLACE((SELECT top 1 [TelHome] + ' , ' + [TelMobile] + ' , ' + [TelOffice] FROM [Bighead_Mobile].[dbo].[vw_GetAddress] WHERE AddressTypeCode = 'AddressPayment' AND refno = C.refno),', -',''),'- ,','') AS AddressPaymentTel
- ,(SELECT top 1 AddressString FROM [Bighead_Mobile].[dbo].[vw_GetAddress] WHERE AddressTypeCode = 'AddressIDCard' AND refno = C.refno) AS AddressIDCard
+  ,(SELECT AddressString FROM [Bighead_Mobile].[dbo].[vw_GetAddress] WHERE AddressTypeCode = 'AddressInstall' AND refno = C.refno) AS AddressInstall
+  ,(SELECT [TelHome] + ' , ' + [TelMobile] + ' , ' + [TelOffice] FROM [Bighead_Mobile].[dbo].[vw_GetAddress] WHERE AddressTypeCode = 'AddressInstall' AND refno = C.refno) AS AddressInstallTel
+  ,(SELECT AddressString FROM [Bighead_Mobile].[dbo].[vw_GetAddress] WHERE AddressTypeCode = 'AddressPayment' AND refno = C.refno) AS AddressPayment
+  ,(SELECT [TelHome] + ' , ' + [TelMobile] + ' , ' + [TelOffice] FROM [Bighead_Mobile].[dbo].[vw_GetAddress] WHERE AddressTypeCode = 'AddressPayment' AND refno = C.refno) AS AddressPaymentTel
+  ,(SELECT AddressString FROM [Bighead_Mobile].[dbo].[vw_GetAddress] WHERE AddressTypeCode = 'AddressIDCard' AND refno = C.refno) AS AddressIDCard
   ,C.[TradeInProductCode] + ' ' +C.[TradeInBrandCode] + ' ' + C.[TradeInProductModel] AS TradeIn
   ,E.[FirstName] +' '+ E.LastName AS SaleName
   ,Ed.[FirstName] +' '+ Ed.LastName AS ServiceName
@@ -284,8 +261,7 @@ if (!empty($_REQUEST['EmpID'])) {
    (SELECT SUM(Payamt) FROM Bighead_Mobile.dbo.Payment WHERE Refno = c.Refno) as PayAll
   ,(SELECT TOP 1 PaymentPeriodNumber FROM [Bighead_Mobile].[dbo].[SalePaymentPeriod] WHERE Refno =
   C.Refno AND PaymentComplete = 1 ORDER BY PaymentPeriodNumber DESC) as PaymentPeriodNumber
-  ,PD.ProductName
-  ,case
+  ,PD.ProductName,case
  when CAST(EFFDATE as time) >= '00:00:00' and  CAST(EFFDATE as time) < '11:59:59' then 'ก่อนเที่ยง'
  when CAST(EFFDATE as time) >= '12:00:00' and  CAST(EFFDATE as time) < '14:59:59' then 'หลังเที่ยงถึงบ่ายสาม'
  when CAST(EFFDATE as time) >= '15:00:00' and  CAST(EFFDATE as time) < '17:59:59' then 'บ่ายสามถึงหกโมงเย็น'
@@ -299,16 +275,18 @@ end as timeSet
   INNER JOIN [Bighead_Mobile].[dbo].Organization AS OG ON C.organizationCode = OG.organizationCode
   INNER JOIN [Bighead_Mobile].[dbo].[Fortnight] As Ft ON FT.FortnightID = C.FortnightID
   INNER JOIN [Bighead_Mobile].[dbo].[Product] AS PD ON PD.ProductID = C.ProductID
-  where c.STATUS IN ('NORMAL','F') AND C.IsMigrate = 0 $WHERE $WHERE1";
+  where c.STATUS IN ('NORMAL','F') AND C.IsMigrate = 0 $WHERE $WHERE1 ORDER BY C.SaleCode,C.SaleSubTeamCode,C.SaleTeamCode,C.ContractReferenceNo ASC";
 
-              $sql_case = $sql_select." ".$orderbyTime;
 
-              $sql_print = $sql_select." ".$orderbysalecode;
+
+              $sql_case = $sql_select;
+
+              $sql_print = $sql_select;
 
               //echo $sql_case;
-              //$file = fopen("../tsr_SaleReport/pages/sqlText.txt","w");
-              //fwrite($file,$sql_case);
-              //fclose($file);
+              $file = fopen("../tsr_SaleReport/pages/sqlText.txt","w");
+              fwrite($file,$sql_case);
+              fclose($file);
 
               $conns = connectDB_TSR();
               // เพิ่มลงฐานข้อมูล
@@ -378,7 +356,7 @@ end as timeSet
                 <td style="text-align: center"><?=DateTimeThai($row['EFFDATE2'])?> น.</td>
                 <td><?=$row['SaleCode']?> - <?=$row['SaleName']?></td>
                 <td><?=$row['PreSaleEmployeeCode']?> - <?=$row['PreSaleEmployeeName']?></td>
-                <td><?=$row['SaleTeamCode']?></td>
+                <td style="text-align: center"><?=$row['SaleTeamCode']?></td>
                 <td style="text-align: center"><?=$row['Model']?></td>
                 <td><?=$row['CustomerName']?></td>
                 <td style="text-align: right"><?=number_format($row['sales'],2)?></td>
@@ -393,7 +371,7 @@ end as timeSet
                 <tfoot>
                 </tfoot>
                </table>";
-                $html_file = $httpExcelHead."".$httpExcel1."".$httpExcel2."".$httpExcel3;
+                $html_file = $html_file = $httpExcel1."".$httpExcel2."".$httpExcel3;
                 write_data_for_export_excel($html_file, 'ReportSale');
                ?>
              </tbody>
@@ -430,13 +408,15 @@ end as timeSet
           </tr>
         -->
         </table>
+
           <a href="export_excel.php?report_type=6"><img src="http://app.thiensurat.co.th/tsr_car/image/excel-icon.png" width="35" height="auto"> </a>
+
           </div>
         </div>
         <?php
           }
           sqlsrv_close($conn);
-          //sqlsrv_close($conns);
+          sqlsrv_close($conns);
         ?>
         </div>
 
@@ -493,7 +473,7 @@ end as timeSet
 					//กำหนดให้ ตัวแปร province มีค่าเท่ากับ ค่าของ #province ที่กำลังถูกเลือกในขณะนั้น
 					var LvEmp = $(this).val();
 					$.ajax({
-						url:"pages/getdata_type_search.php",//url:"get_data.php",
+						url:"pages/getdata_type_search_on.php",//url:"get_data.php",
 						dataType: "json",//กำหนดให้มีรูปแบบเป็น Json
 						data:{LvEmp:LvEmp},//ส่งค่าตัวแปร province_id เพื่อดึงข้อมูล อำเภอ ที่มี province_id เท่ากับค่าที่ส่งไป
 						success:function(data){

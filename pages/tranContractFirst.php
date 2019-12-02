@@ -1,41 +1,19 @@
 <?php
-//ini_set('display_errors', 'on');
-//ini_set('error_reporting', E_ALL);
-$limit_per_page = 100;
-$page = (isset($_GET['page'])) ? intval($_GET['page']) : 1;
-$limit_start = (($page - 1) * $limit_per_page) + 1;
-$limit_end = ($page) * $limit_per_page;
-
-if ((isset($_REQUEST['searchText']))) {
-  $top = "";
-  $searchText = $_REQUEST['searchText'];
-  $where = "AND con.contno = '".$_REQUEST['searchText']."'";
-}else {
-  $top = "TOP 1";
-  $where = "AND con.contno = '11517550'";
-}
-
+ini_set('display_errors', 'on');
+ini_set('error_reporting', E_ALL);
 
 if (!empty($_REQUEST['contno'])) {
-  //echo $_REQUEST['contno'];
-  //echo $_REQUEST['AssigneeEmpID'];
-  //$conn = connectDB_BigHead();
-
-  /*
-  $sql = "EXEC [dbo].[usp_TSR_Assign_UpdateAssignForChangeEmployee]
-  @CONTNO = N'".$_REQUEST['contno']."',
-  @OldAssigneeEmpID = null,
-  @NewAssigneeEmpID = N'".$_REQUEST['AssigneeEmpID']."'";
-  */
-
+/*
   $sql = "EXEC [dbo].usp_TSR_Contract_MoveMultipleContractToZone
   @OrganizationCode = 0,
   @CONTNOLIST = '".$_REQUEST['contno']."',
   @ZoneCode= '".$_REQUEST['AssigneeEmpID']."',
   @RemoveAssign = 'Y',
   @AutoAssign = 'Y'";
-
+*/
   //echo $sql;
+
+
 
   $conn = connectDB_BigHead();
   $stmt1 = sqlsrv_query( $conn, $sql );
@@ -66,7 +44,7 @@ if (!empty($_REQUEST['contno'])) {
       <div class="row">
         <div class="col-md-3">
           <h4>
-            โอนลูกค้ารายสัญญา
+            Assignงวดแรก
           </h4>
         </div>
         <div class="col-md-3">
@@ -78,13 +56,13 @@ if (!empty($_REQUEST['contno'])) {
 
       </div>
 
-
+      <!--
       <ol class="breadcrumb">
         <li><a href="index.php?pages=info"><i class="fa fa-user"></i> ระบบจัดการข้อมูล</a></li>
         <li><i class="fa fa-user"></i> ระบบการเก็บเงิน</li>
         <li class="active"> โอนลูกค้ารายสัญญา </li>
       </ol>
-
+    -->
 
     </section>
 
@@ -95,11 +73,11 @@ if (!empty($_REQUEST['contno'])) {
         <div class="box">
           <div class="box-header">
             <div class="col-md-8">
-              <h3 class="box-title">ข้อมูลเลขที่สัญญา</h3>
+              <h3 class="box-title">Assignงวดแรก</h3>
             </div>
             <!--<div class="box-tools">-->
             <div class="col-md-4">
-              <form role="form" data-toggle="validator" id="formSearchEmpHr" name="formSearchEmpHr" method="post" action="index.php?pages=tranCByC">
+              <form role="form" data-toggle="validator" id="formSearchEmpHr" name="formSearchEmpHr" method="post" action="index.php?pages=tranContractFirst">
               <div class="input-group input-group-sm">
                 <input type="text" name="searchText" class="form-control pull-right" id="counto" required placeholder="ค้นหา เลขที่สัญญา" value="<?php if(!empty($searchText)){ echo $searchText;}?>">
 
@@ -129,37 +107,9 @@ if (!empty($_REQUEST['contno'])) {
               </tr>
 
               <?php
-                $conn = connectDB_TSR();
+                $conn = connectDB_BigHead();
 
-                $sql_case = "SELECT distinct top 1 con.contno,decu.customername,con.effdate ,sap.PaymentDueDate
-                ,Right('000'+Convert(Varchar,sap.paymentperiodnumber-1),2) AS paymentperiodnumber
-                ,sap.netamount ,ass.AssigneeEmpID ,Ed.salecode as salecode,right(Ed.salecode,3) as zone ,em.FirstName+' '+em.LastName AS CreditName
-                ,c2.creditname as creditname2,ass.LastUpdateDate,ass.refno as refno
-                ,con.ContractReferenceNo AS ContRefno
-                ,case when len(con.RefNo) > 9 then 'B' else 'R' end as colorStatus
-                ,case when con.service = '00000000' then salecode else con.service end as service
-                FROM [TSS_PRD].[Bighead_Mobile].[dbo].vw_Last_Assign as ass WITH(NOLOCK)
-                left join [TSS_PRD].[Bighead_Mobile].[dbo].[vw_ContactActive] as con WITH(NOLOCK)
-                on ass.RefNo = con.RefNo
-                left join [TSS_PRD].[Bighead_Mobile].[dbo].[SalePaymentPeriod] as sap WITH(NOLOCK)
-                on con.RefNo = sap.RefNo
-                left join [TSS_PRD].TSRData_Source.dbo.vw_DebtorCustomer as decu WITH(NOLOCK)
-                on decu.CustomerID=con.CustomerID
-                LEFT JOIN [TSS_PRD].Bighead_Mobile.dbo.Employee AS Em WITH(NOLOCK) ON Em.EmpID = ass.AssigneeEmpID
-                LEFT JOIN [TSS_PRD].Bighead_Mobile.dbo.EmployeeDetail AS Ed WITH(NOLOCK)
-                ON Ed.EmployeeCode = ass.AssigneeEmpID
-
-                LEFT JOIN [TSR_Application].[dbo].[View_Bighead_credit_2] as c2 WITH(NOLOCK)
-                ON c2.CONTNO = con.contno
-
-                where
-                sap.PaymentComplete = 0
-              AND Ed.salecode IS NOT NUll
-              and sap.PaymentPeriodNumber in ( SELECT min([PaymentPeriodNumber])
-              FROM [TSS_PRD].[Bighead_Mobile].[dbo].[SalePaymentPeriod] WITH(NOLOCK)
-              where refno = ass.refno and PaymentComplete = 0
-              group by refno)
-              $where";
+                $sql_case = "";
 
                 //echo $sql_case;
 
@@ -190,15 +140,6 @@ if (!empty($_REQUEST['contno'])) {
                         <?php
                           $conns = connectDB_BigHead();
 
-                          //$sql1 = "SELECT CCode,mcode,Name,EmpID ,case when ed.SaleCode is null then '-' else ed.SaleCode end as SaleCode ,SupervisorCode FROM [TsrData_source].[dbo].[CArea] AS C LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = c.EmpID AND salecode is not null WHERE EmpId is not null AND EmpId != '' AND SupervisorCode is not null ORDER BY ccode";
-                          /*
-                          $sql1 = "SELECT DISTINCT em.EmpID , em.FirstName + ' ' + em.LastName As CreditName
-                          FROM Bighead_Mobile.dbo.Employee AS Em
-                          LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed
-                          ON Ed.EmployeeCode = em.empID
-                          WHERE SourceSystem != 'Sale' ORDER BY EMPID";
-                          */
-
                           $sql1 = "SELECT DISTINCT em.EmpID ,ed.SaleCode, em.FirstName + ' ' + em.LastName As CreditName
                           FROM Bighead_Mobile.dbo.Employee AS Em WITH(NOLOCK)
                           LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed WITH(NOLOCK)
@@ -221,7 +162,7 @@ if (!empty($_REQUEST['contno'])) {
                   <td style="text-align: center">
                     <input type="hidden" name="contno" value="<?=$row['contno'];?>">
                     <input type="hidden" name="CreateBy" value="<?=$_COOKIE['tsr_emp_id'];?>">
-                    <button type="summit" class="btn btn-block btn-warning"> บันทึก </button></td>
+                    <button type="summit" class="btn btn-block btn-warning" <?php /*if ($row['disStatus'] >= $row['netamount']) {echo "disabled";}*/?>> บันทึก </button></td>
                 </tr>
                 <?php
                   }

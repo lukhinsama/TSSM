@@ -23,7 +23,7 @@ if (empty($_REQUEST['searchDate'])) {
   $top = "TOP 10";
 }else {
   $searchDate = DateThai(DateEng($_REQUEST['searchDate']));
-  $WHERE = " R.DatePayment BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59'";
+  $WHERE = " RV.LastUpdateDate BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59'";
   $top = "";
 }
 
@@ -33,7 +33,7 @@ if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
   $top = "TOP 10";
 }else {
   $searchDate = DateThai(DateEng($_REQUEST['startDate']))." - ".DateThai(DateEng($_REQUEST['endDate']));
-  $WHERE = " R.DatePayment BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
+  $WHERE = " RV.LastUpdateDate BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
   $top = "";
 }
 
@@ -41,56 +41,22 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
   if (substr($_COOKIE['tsr_emp_id'],0,1) == "0") {
     $EmpID['0'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
     $EmpID['1'] = $_COOKIE['tsr_emp_name'];
-    $connss = connectDB_BigHead();
 
-    $SQl = "SELECT case when EmployeeCode = TeamHeadCode THEN TeamCode WHEN EmployeeCode = DepartmentHeadCode THEN Departmentcode ELSE EmployeeCode END AS valueText ,case when EmployeeCode = TeamHeadCode THEN 'TeamCode' WHEN EmployeeCode = DepartmentHeadCode THEN 'DepartmentCode' ELSE 'EmployeeCode' END AS statusText  FROM Bighead_Mobile.dbo.EmployeeDetail WHERE PositionCode = 'dept' AND EmployeeCode = '".$EmpID['0']."'";
-    //echo $SQl;
-    $stmt = sqlsrv_query($connss,$SQl);
-    while ($r = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
-      if ($r['statusText'] == 'TeamCode') {
-       $WHERE .= " AND Ed.TeamCode = '".$r['valueText']."'";
-     }elseif ($r['statusText'] == 'DepartmentCode') {
-       $WHERE .= " AND Ed.DepartmentCode = '".$r['valueText']."'";
-     }else {
-       $WHERE .= " AND Ed.EmployeeCode = '".$r['valueText']."'";
-     }
-    }
-    sqlsrv_close($connss);
-    //$WHERE .= " AND R.LastUpdateBy = '".$EmpID['0']."'";
+  //  $connss = connectDB_BigHead();
+    //$sql_Empid = "SELECT SaleCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE EmployeeCode = '".$EmpID['0']."'";
+    $WHERE .= "AND R.ZoneCode in (SELECT SaleCode FROM Bighead_Mobile.dbo.EmployeeDetail AS Ed WHERE ed.salecode is not null AND ed.TeamCode IN (
+      SELECT DISTINCT TeamCode  FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent] WHERE EmployeeCodeLV2 = '".$EmpID['0']."' OR EmployeeCodeLV3 = '".$EmpID['0']."'   OR EmployeeCodeLV4 = '".$EmpID['0']."' OR EmployeeCodeLV5 = '".$EmpID['0']."' OR EmployeeCodeLV6 = '".$EmpID['0']."' OR ParentEmployeeCode = '".$EmpID['0']."'))
+ ";
+
+
   }
 }else {
   if (empty($_REQUEST['EmpID'])) {
     $EmpID = array('0','-');
   }else {
     $EmpID = explode("_",$_REQUEST['EmpID']);
-    $WHERE .= " AND R.LastUpdateBy = '".$EmpID['0']."'";
+    $WHERE .= " AND R.ZoneCode = '".$EmpID['2']."'";
   }
-}
-
-if (!empty($_REQUEST['sortcontno'])) {
-  if ($_REQUEST['sortcontno'] == "ASC") {
-    $sort = "ORDER BY CONTNO";
-    $sortcontno = "DESC";
-    $sortreceipt = "DESC";
-  }else {
-    $sort = "ORDER BY CONTNO DESC";
-    $sortcontno = "ASC";
-    $sortreceipt = "DESC";
-  }
-}elseif(!empty($_REQUEST['sortreceipt'])) {
-  if ($_REQUEST['sortreceipt'] == "ASC") {
-    $sort = "ORDER BY ReceiptCode";
-    $sortreceipt = "DESC";
-    $sortcontno = "ASC";
-  }else {
-    $sort = "ORDER BY ReceiptCode DESC";
-    $sortreceipt = "ASC";
-    $sortcontno = "ASC";
-  }
-}else {
-  $sort = "ORDER BY ReceiptCode,PaymentPeriodNumber";
-  $sortcontno = "ASC";
-  $sortreceipt = "DESC";
 }
   $conn = connectDB_BigHead();
  ?>
@@ -99,10 +65,10 @@ if (!empty($_REQUEST['sortcontno'])) {
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="row">
-        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportdept5">
+        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportsale8">
         <div class="col-md-3">
           <h4>
-            รายงานยกเลิกใบเสร็จรายบุคคล
+            เก็บงวดแรก(ยกเลิก)
           </h4>
         </div>
         <div class="col-md-4">
@@ -112,29 +78,17 @@ if (!empty($_REQUEST['sortcontno'])) {
           <div class="form-group group-sm">
             <select class="form-control select2 group-sm" name="EmpID" >
               <optgroup label="พนักงานเก็บเงิน">
-                <?PHP
-                if ($_COOKIE['tsr_emp_id'] == 'ZDP001') {
-                  $supcode = "AND SupervisorCode = '80101'";
-                }elseif ($_COOKIE['tsr_emp_id'] == 'ZDP002') {
-                  $supcode = "AND SupervisorCode = '80102'";
-                }else {
-                  $supcode = "";
-                }
-                  ?>
+
                   <option value="0"> ทั้งหมด </option>
                   <?php
 
-
-                //$sql_case = "SELECT  CCode,Name,EmpID FROM [TsrData_source].[dbo].[CArea] WHERE EmpId is not null AND EmpId != '' ORDER BY EmpId ";
-                //$sql_case = "SELECT CCode,Name,EmpID ,case when ed.SaleCode is null then '-' else ed.SaleCode end as SaleCode ,SupervisorCode FROM [TsrData_source].[dbo].[CArea] AS C LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = c.EmpID AND salecode is not null WHERE EmpId is not null AND EmpId != '' AND SupervisorCode is not null  $supcode ORDER BY ccode";
-
-                $sql_case = "SELECT SaleCode as mcode,EmployeeName AS Name ,EmployeeCode AS EmpID,case when SaleCode is null then '-' else SaleCode end as SaleCode ,SupervisorCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE  salecode is not null AND SupervisorCode is not null AND SourceSystem = 'Credit' AND  PositionCode like 'dept%' $supcode ORDER BY mcode";
+                $sql_case = "SELECT SaleCode as mcode,TeamCode,EmployeeName AS Name ,EmployeeCode AS EmpID,case when SaleCode is null then '-' else SaleCode end as SaleCode ,SupervisorCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE  salecode is not null AND SupervisorCode is not null AND ProcessType = 'sale' AND TeamCode is not null ORDER BY TeamCode";
 
                 //echo $sql_case;
                 $stmt = sqlsrv_query($conn,$sql_case);
                 while ($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
                 ?>
-                <option value="<?=$row['EmpID']?>_<?=$row['Name']?>_<?=$row['SaleCode']?>_<?=$row['mcode']?>"><?=$row['EmpID']?> (<?=$row['SaleCode']?>) <?=$row['Name']?> </option>
+              <option value="<?=$row['EmpID']?>_<?=$row['Name']?>_<?=$row['SaleCode']?>_<?=$row['mcode']?>"><?=$row['EmpID']?> (<?=$row['TeamCode']?>) <?=$row['Name']?> </option>
                 <?php
                   }
                 ?>
@@ -170,14 +124,6 @@ if (!empty($_REQUEST['sortcontno'])) {
         </form>
       </div>
 
-      <!--
-      <ol class="breadcrumb">
-        <li><a href="index.php?pages=info"><i class="fa fa-user"></i> รายงาน</a></li>
-        <li><i class="fa fa-user"></i> รายงาน(ฝ่ายเครดิต)</li>
-        <li class="active"> สรุปการเก็บเงินรายวัน </li>
-      </ol>
-    -->
-
     </section>
 
     <!-- Main content -->
@@ -192,10 +138,10 @@ if (!empty($_REQUEST['sortcontno'])) {
            ?>
           <div class="box box-info">
             <div class="box-header with-border">
-              <P><center><B>รายงานยกเลิกใบเสร็จรายบุคคล </B></center></P>
+              <P><center><B>รายงานสรุปการยกเลิกเก็บเงินงวดแรก</B></center></P>
               <table width="100%">
                 <tr>
-                  <td>พนักงานเก็บเงิน : <?=$EmpID['0']?> , <?=$EmpID['2']?> , <?=$EmpID['3']?></td>
+                  <td>พนักงานขาย : <?=$EmpID['0']?> , <?=$EmpID['2']?></td>
                   <td><?=$EmpID['1']?></td>
                   <td>ประจำวันที่ : <?=$searchDate?></td>
                   <td>พิมพ์โดย : <?=$_COOKIE['tsr_emp_name']?></td>
@@ -203,10 +149,11 @@ if (!empty($_REQUEST['sortcontno'])) {
               </table>
             </div>
             <?php
-            $httpExcelHead = "<P><center><B>รายงานยกเลิกใบเสร็จรายบุคคล </B></center></P>
+            $httpExcelHead = "<P><center><B>รายงานสรุปการยกเลิกเก็บเงินงวดแรก</B></center></P>
           <P><center><B> พนักงานเก็บเงิน : ".$EmpID['0']." , ".$EmpID['2']." ประจำวันที่ : ".$searchDate." พิมพ์โดย : ".$_COOKIE['tsr_emp_name']."</B></center></P>";
 
              ?>
+
           <!--<div class="box-body table-responsive no-padding">-->
           <div class="box-body">
 
@@ -214,54 +161,69 @@ if (!empty($_REQUEST['sortcontno'])) {
               <thead>
               <tr>
                 <th style="text-align: center">ลำดับ</th>
-                <!--<th style="text-align: center"><a href="http://app.thiensurat.co.th/tssm/index.php?pages=reportcredit2&searchDate=<?=$_REQUEST['searchDate']?>&EmpID=<?=$_REQUEST['EmpID']?>&sortreceipt=<?=$sortreceipt?>">เลขที่ใบเสร็จ</a></th>-->
                 <th style="text-align: center">เลขที่ใบเสร็จ</th>
                 <th style="text-align: center">เวลาออกใบเสร็จ</th>
                 <th style="text-align: center">งวดที่</th>
-                <!--<th style="text-align: center"><a href="http://app.thiensurat.co.th/tssm/index.php?pages=reportcredit2&searchDate=<?=$_REQUEST['searchDate']?>&EmpID=<?=$_REQUEST['EmpID']?>&sortcontno=<?=$sortcontno?>">เลขที่สัญญา</a></th>-->
+                <th style="text-align: center">เลขที่อ้างอิง</th>
                 <th style="text-align: center">เลขที่สัญญา</th>
                 <th style="text-align: center">ชื่อ - สกุล</th>
                 <th style="text-align: center">จำนวนเงิน</th>
+                <th style="text-align: center">งวดแรก</th>
               </tr>
             </thead>
             <tbody>
               <?php
+
               $httpExcel1 = "<table width = \"100%\">
               <thead>
               <tr>
                 <th style=\"text-align: center\">ลำดับ</th>
+                <th style=\"text-align: center\">ชื่อพนักงานเก็บเงิน</th>
+                <th style=\"text-align: center\">รหัสเขตเก็บเงิน</th>
                 <th style=\"text-align: center\">เลขที่ใบเสร็จ</th>
                 <th style=\"text-align: center\">เวลาออกใบเสร็จ</th>
                 <th style=\"text-align: center\">งวดที่</th>
+                <th style=\"text-align: center\">เลขที่อ้างอิง</th>
                 <th style=\"text-align: center\">เลขที่สัญญา</th>
                 <th style=\"text-align: center\">ชื่อ - สกุล</th>
                 <th style=\"text-align: center\">จำนวนเงิน</th>
+                <th style=\"text-align: center\">งวดแรก</th>
               </tr>
-              </thead>
-              <tbody>";
+            </thead>
+            <tbody>";
                 $httpExcel2 = "";
 
-                $sql_select = "SELECT $top row_number() OVER (ORDER BY R.ReceiptCode ASC) AS rownum, R.CreateBy AS EmpID, Ed.FirstName + ' ' + Ed.LastName AS Names , CONVERT(varchar,R.DatePayment,105) AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , 'รายงานยกเลิกใบเสร็จรายบุคคล' AS printHead
-                ,R.ReceiptCode,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate  ,CONVERT(varchar(20),RV.LastUpdateDate,105) +' '+ CONVERT(varchar(5),RV.LastUpdateDate,108) as LastUpdateDate ,case when count(R.ReceiptCode) = 1 then convert(varchar,min(S.PaymentPeriodNumber)) else convert(varchar,min(S.PaymentPeriodNumber)) end as PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,Sy.Amount AS PAYAMT,R.TotalPayment AS PAYAMTS  ,Em.EmpID,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , Ed.FirstName + ' ' + Ed.LastName AS Names";
+              $sql_select = "SELECT ReceiptCode
+              ,CONVERT(varchar,PaymentDueDate) as PaymentDueDate
+              ,case when count(ReceiptCode) = 1 then convert(varchar,min(PaymentPeriodNumber)) else convert(varchar,min(PaymentPeriodNumber)) + ' - ' + convert(varchar,Max(PaymentPeriodNumber)) end as PaymentPeriodNumber
+              ,CONTNO,RefNo
+              ,CustomerName
+              ,case when count(ReceiptCode) = 1 then SUM(PAYAMT) else SUM(PAYAMT) end as PAYAMT
+              ,case when count(ReceiptCode) = 1 then SUM(PAYAMT) else SUM(PAYAMT) end as PAYAMTS
+              ,EmpID
+              ,Names
+              ,Paydate
+              ,PrintName
+              ,SaleCode
+              , 'รายงานสรุปการยกเลิกเก็บเงินงวดแรก' AS printHead
+              ,NetAmount
+              from (SELECT DISTINCT R.ReceiptCode
+              ,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate
+              ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.CONTNO AS CONTNO,C.ContractReferenceNo AS RefNo,CustomerName,RV.TotalPayment AS PAYAMT
+              , Em.FirstName + ' ' + Em.LastName AS Names , '".$searchDate."' AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName,R.CreateBy as EmpID,R.ZoneCode as SaleCode ,S.NetAmount";
 
-                $sql_body = " FROM TSRDATA_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) LEFT JOIN Bighead_Mobile.dbo.ReceiptVoid AS RV ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.LastUpdateBy = EM.EmpID LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' AND Ed.SaleCode is not null WHERE $WHERE  AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0 AND  Ed.EmployeeTypeCode like 'dept%'  GROUP BY R.CreateBy, R.ReceiptCode,R.DatePayment,c.CONTNO,CustomerName,Sy.Amount,R.TotalPayment,Em.EmpID,ed.SaleCode,Ed.FirstName,Ed.LastName,R.ZoneCode,RV.LastUpdateDate $sort";
 
-                $sql_print = "SELECT DISTINCT R.ReceiptCode
-                ,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate
-                ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,R.TotalPayment AS PAYAMT
-                ,ISNULL ((select SendAmount from [Bighead_Mobile].[dbo].SendMoney  WHERE SaveTransactionNoDate is not null  AND CreateBy = em.EmpID AND SaveTransactionNoDate BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59' ),0) as Sendmoney, R.CreateBy AS EmpID, Ed.FirstName + ' ' + Ed.LastName AS Names , CONVERT(varchar,R.DatePayment,105) AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName ,Em.EmpID,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , 'รายงานยกเลิกใบเสร็จรายบุคคล' AS printHead";
-
-                $sql_body_print = "FROM TSRData_Source.dbo.vw_ReceiptWithZone AS R LEFT JOIN Bighead_Mobile.dbo.ReceiptVoid AS RV ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID
-                LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.CreateBy = EM.EmpID
-                LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' AND Ed.SaleCode is not null WHERE $WHERE  AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0 AND  Ed.EmployeeTypeCode like 'dept%'   $sort";
+              $sql_body = " FROM TSRData_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) INNER JOIN Bighead_Mobile.dbo.ReceiptVoid AS Rv WITH(NOLOCK) ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C WITH(NOLOCK) ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC WITH(NOLOCK) ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy WITH(NOLOCK) ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S WITH(NOLOCK) ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em WITH(NOLOCK) ON R.LastUpdateBy = EM.EmpID WHERE $WHERE AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0 AND R.TypeCode = 1
+              ) as result GROUP BY ReceiptCode,PaymentDueDate,CONTNO,CustomerName,EmpID,SaleCode,Names,Paydate,PrintName,RefNo,NetAmount ORDER BY ReceiptCode";
 
               $sql_case = $sql_select." ".$sql_body;
 
-              $sql_print = $sql_print." ".$sql_body_print;
+              $sql_print = $sql_select." ".$sql_body;
 
               //echo $sql_case;
+
               $file = fopen("../tsr_SaleReport/pages/sqlText.txt","w");
-              fwrite($file,$sql_print);
+              fwrite($file,$sql_case);
               fclose($file);
 
               $conns = connectDB_TSR();
@@ -282,42 +244,46 @@ if (!empty($_REQUEST['sortcontno'])) {
               $num_row = checkNumRow($conn,$sql_case);
               $SumTotal = 0 ;
 
-
+              $i=0;
               $stmt = sqlsrv_query($conn,$sql_case);
               while ($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
                 $SumTotal = $SumTotal + $row['PAYAMT'];
+                $i++;
                 $httpExcel2 .= "<tr>
-                  <td style=\"text-align: center\">".$row['rownum']."</td>
+                  <td style=\"text-align: center\">".$i."</td>
+                  <td>".$row['Names']."</td>
+                  <td>".$row['SaleCode']."</td>
                   <td>#".$row['ReceiptCode']."</td>
                   <td style=\"text-align: center\">".DateTimeThai($row['PaymentDueDate'])." น.</td>
                   <td style=\"text-align: center\">".$row['PaymentPeriodNumber']."</td>
+                  <td style=\"text-align: center\">".$row['RefNo']."</td>
                   <td style=\"text-align: center\">".$row['CONTNO']."</td>
                   <td>".$row['CustomerName']."</td>
                   <td style=\"text-align: right\">".number_format($row['PAYAMT'],2)."</td>
+                  <td style=\"text-align: right\">".number_format($row['NetAmount'],2)."</td>
                 </tr>";
-
               ?>
 
               <tr>
-                <td style="text-align: center"><?=$row['rownum']?></td>
-                <td><?=$row['ReceiptCode']?></td>
-                <td style="text-align: center"><?=DateTimeThai($row['PaymentDueDate'])?> น.</td>
-                <td style="text-align: center"><?=$row['PaymentPeriodNumber']?></td>
-                <td style="text-align: center"><?=$row['CONTNO']?></td>
-                <td><?=$row['CustomerName']?></td>
-                <td style="text-align: right"><?=number_format($row['PAYAMT'],2)?></td>
+                    <td style="text-align: center"><a class="text-danger"><?=$i?></a></td>
+                    <td><a class="text-danger"><?=$row['ReceiptCode']?></a></td>
+                    <td style="text-align: center"><a class="text-danger"><?=DateTimeThai($row['PaymentDueDate'])?> น.</a></td>
+                    <td style="text-align: center"><a class="text-danger"><?=$row['PaymentPeriodNumber']?></a></td>
+                    <td style="text-align: center"><a class="text-danger"><?=$row['RefNo']?></a></td>
+                    <td style="text-align: center"><a class="text-danger"><?=$row['CONTNO']?></a></td>
+                    <td><a class="text-danger"><?=$row['CustomerName']?></a></td>
+                    <td style="text-align: right"><a class="text-danger"><?=number_format($row['PAYAMT'],2)?></a></td>
+                    <td style="text-align: right"><a class="text-danger"><?=number_format($row['NetAmount'],2)?></a></td>
               </tr>
 
               <?php
                 }
-
                 $httpExcel3 = "</tbody>
                 <tfoot>
                 </tfoot>
                </table>";
                 $html_file = $html_file = $httpExcelHead."".$httpExcel1."".$httpExcel2."".$httpExcel3;
                 write_data_for_export_excel($html_file, 'ReportCreditPar3');
-
                ?>
              </tbody>
              <tfoot>
@@ -353,11 +319,13 @@ if (!empty($_REQUEST['sortcontno'])) {
           </tr>
         -->
         </table>
-        <a href="export_excel.php?report_type=3"><img src="http://app.thiensurat.co.th/tsr_car/image/excel-icon.png" width="35" height="auto"> </a>
+          <a href="export_excel.php?report_type=3"><img src="http://app.thiensurat.co.th/tsr_car/image/excel-icon.png" width="35" height="auto"> </a>
           </div>
         </div>
         <?php
           }
+          sqlsrv_close($conn);
+          sqlsrv_close($conns);
         ?>
         </div>
 

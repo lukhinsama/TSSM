@@ -13,7 +13,7 @@ if (!empty($_POST['printID'])) {
         $ReceiptCode .= "'".$x_value."'";
     }
 
-    $WHERE = "WHERE R.ReceiptCode IN ($ReceiptCode)";
+    $WHERE1 = "WHERE R.ReceiptCode IN ($ReceiptCode)";
 
     $SQLPrint = "SELECT distinct e.empid,
     (select TSRData_Source.dbo.fn_convertDatetothai(R.DatePayment)) as PaymentDueDate,
@@ -22,14 +22,14 @@ if (!empty($_POST['printID'])) {
     ,C.CONTNO ,C.SALES,C.ProductSerialNumber,C.MODEL,C.MODE
     ,P.ProductName
     ,DC.CustomerName
-    ,SP.PaymentPeriodNumber , SP.NetAmount
+    ,SP.PaymentPeriodNumber , R.TotalPayment AS NetAmount
     ,REPLACE(REPLACE(REPLACE(AD.AddressDetail+ ' หมู่ ' + AD.AddressDetail2 + ' ซอย ' + AD.AddressDetail3 + ' ถนน ' + AD.AddressDetail4
     ,'หมู่ -',' '),'ซอย -',' '),'ถนน -',' ') AS ADDRESS1
     ,' ต. ' +(SELECT SubDistrictName FROM Bighead_Mobile.dbo.SubDistrict WHERE SubDistrictCode = AD.SubDistrictCode)
     + ' อ. ' +(SELECT DistrictName FROM Bighead_Mobile.dbo.District WHERE DistrictCode = AD.DistrictCode)
     + ' จ. ' +(SELECT ProvinceName FROM Bighead_Mobile.dbo.Province WHERE ProvinceCode = AD.ProvinceCode)
     +' รหัสไปรษณีย์ ' + Zipcode AS ADDRESS2
-    ,(SELECT SUM(NetAmount) FROM Bighead_Mobile.dbo.SalePaymentPeriod WHERE refno = C.RefNo AND PaymentComplete = 0) AS Balance
+    ,ISNULL(CASE WHEN SP.PaymentComplete = 1 THEN (SELECT SUM(NetAmount) FROM Bighead_Mobile.dbo.SalePaymentPeriod WHERE refno = C.RefNo AND PaymentPeriodNumber > Sp.PaymentPeriodNumber) ELSE SP.NetAmount - R.TotalPayment + (SELECT SUM(NetAmount) FROM Bighead_Mobile.dbo.SalePaymentPeriod WHERE refno = C.RefNo AND PaymentPeriodNumber > Sp.PaymentPeriodNumber) END,0) AS Balance
     FROM TSRData_Source.dbo.vw_ReceiptWithZone AS R
     INNER JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo
     INNER JOIN Bighead_Mobile.dbo.DebtorCustomer AS DC ON C.CustomerID = DC.CustomerID
@@ -39,7 +39,7 @@ if (!empty($_POST['printID'])) {
     LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS SP ON SPP.SalePaymentPeriodID = SP.SalePaymentPeriodID
     LEFT JOIN Bighead_Mobile.dbo.MigrateReportDailyReceiptB AS B ON B.InvNo = R.ReceiptCode
     LEFT JOIN Bighead_Mobile.dbo.Address AS AD ON AD.RefNo = C.RefNo AND AD.AddressTypeCode = 'AddressPayment'
-    $WHERE";
+    $WHERE1";
     //ECHO $SQLPrint;
 
     $conns = connectDB_TSR();
@@ -121,12 +121,13 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
 
   }
 }else {
-  if (empty($_REQUEST['EmpID'])) {
-    $EmpID = array('0','-');
-  }else {
+  //echo $_REQUEST['EmpID'];
+  if (!empty($_REQUEST['EmpID'])) {
+    //$EmpID = array('0','-');
     $EmpID = explode("_",$_REQUEST['EmpID']);
     $WHERE .= " AND R.ZoneCode = '".$EmpID['2']."'";
   }
+
 }
   $conn = connectDB_BigHead();
  ?>
@@ -135,10 +136,10 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="row">
-        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportoper2_test">
+        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportOperPrintReceipt">
         <div class="col-md-3">
           <h4>
-            สรุปการเก็บเงินรายบุคคล
+            รายงานใบเสร็จรายบุคคล
           </h4>
         </div>
         <div class="col-md-4">
@@ -186,7 +187,9 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
         </div>
 
         <div class="col-md-1">
+          <!--
           <a href="http://app.thiensurat.co.th/lkh/rpt_lk1.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=1" target="_blank" class="btn btn-default"> <i class="fa fa-print"></i> </a>
+        -->
         </div>
         </form>
       </div>
@@ -212,26 +215,10 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
 
            ?>
           <div class="box box-info">
-            <div class="box-header with-border">
-              <P><center><B>รายงานสรุปการเก็บเงิน</B></center></P>
-              <table width="100%">
-                <tr>
-                  <td>พนักงานเก็บเงิน : <?=$EmpID['0']?> , <?=$EmpID['2']?> , <?=$EmpID['3']?></td>
-                  <td><?=$EmpID['1']?></td>
-                  <td>ประจำวันที่ : <?=$searchDate?></td>
-                  <td>พิมพ์โดย : <?=$_COOKIE['tsr_emp_name']?></td>
-                </tr>
-              </table>
-            </div>
-            <?php
-            $httpExcelHead = "<P><center><B>รายงานสรุปการเก็บเงิน</B></center></P>
-          <P><center><B> พนักงานเก็บเงิน : ".$EmpID['0']." , ".$EmpID['2']." ประจำวันที่ : ".$searchDate." พิมพ์โดย : ".$_COOKIE['tsr_emp_name']."</B></center></P>";
-
-             ?>
-
           <!--<div class="box-body table-responsive no-padding">-->
           <div class="box-body">
-            <form role="form" data-toggle="validator" id="formPrint" name="formPrint" method="post" action="index.php?pages=reportoper2_test">
+            <form role="form" data-toggle="validator" id="formPrint" name="formPrint" method="post" action="index.php?pages=reportOperPrintReceipt">
+              <button type="submit" class="btn btn-default"><i class="fa fa-print"></i></button>
             <table id="example2" class="table table-hover table-striped">
               <thead>
               <tr>
@@ -243,29 +230,13 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
                 <th style="text-align: center">ชื่อ - สกุล</th>
                 <th style="text-align: center">จำนวนเงิน</th>
                 <th style="text-align: center">ค่างวด</th>
-                <th style="text-align: center">พิมพ์</th>
+                <th style="text-align: right"><input name="CheckAll" type="checkbox" id="CheckAll" value="Y" onclick="checkAll('chkbox');"></th>
+
               </tr>
             </thead>
             <tbody>
               <div class="form-group">
               <?php
-
-              $httpExcel1 = "<table width = \"100%\">
-              <thead>
-              <tr>
-                <th style=\"text-align: center\">ลำดับ</th>
-                <th style=\"text-align: center\">ชื่อพนักงานเก็บเงิน</th>
-                <th style=\"text-align: center\">รหัสเขตเก็บเงิน</th>
-                <th style=\"text-align: center\">เลขที่ใบเสร็จ</th>
-                <th style=\"text-align: center\">เวลาออกใบเสร็จ</th>
-                <th style=\"text-align: center\">งวดที่</th>
-                <th style=\"text-align: center\">เลขที่สัญญา</th>
-                <th style=\"text-align: center\">ชื่อ - สกุล</th>
-                <th style=\"text-align: center\">จำนวนเงิน</th>
-                <th style=\"text-align: center\">ค่างวด</th>
-              </tr>
-            </thead>
-            <tbody>";
                 $httpExcel2 = "";
               $sql_select = "SELECT ReceiptCode
               ,CONVERT(varchar,PaymentDueDate) as PaymentDueDate
@@ -289,47 +260,8 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
               $sql_body = " FROM TSRData_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) LEFT JOIN Bighead_Mobile.dbo.Contract AS C WITH(NOLOCK) ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC WITH(NOLOCK) ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy WITH(NOLOCK) ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S WITH(NOLOCK) ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em WITH(NOLOCK) ON R.LastUpdateBy = EM.EmpID WHERE $WHERE AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount > 0 AND R.TypeCode = 0
               ) as result GROUP BY ReceiptCode,PaymentDueDate,CONTNO,CustomerName,EmpID,SaleCode,Names,Paydate,PrintName,PaymentAmount ORDER BY ReceiptCode";
 
-
-              $sql_print = "SELECT row_number() OVER (ORDER BY ReceiptCode ASC) AS rownum
-              ,ReceiptCode
-              ,CONVERT(varchar,PaymentDueDate) as PaymentDueDate
-              ,case when count(ReceiptCode) = 1 then convert(varchar,min(PaymentPeriodNumber)) else convert(varchar,min(PaymentPeriodNumber)) + ' - ' + convert(varchar,Max(PaymentPeriodNumber)) end as PaymentPeriodNumber
-              ,CONTNO
-              ,CustomerName
-              ,case when count(ReceiptCode) = 1 then SUM(PAYAMT) else SUM(PAYAMT) end as PAYAMT
-              ,case when count(ReceiptCode) = 1 then SUM(PAYAMT) else SUM(PAYAMT) end as PAYAMTS
-              ,EmpID
-              ,'".$EmpID['1']."' AS Names
-              ,Paydate
-              ,PrintName
-              ,SaleCode
-              from (SELECT ReceiptCode
-              ,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate
-              ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,Sy.Amount AS PAYAMT
-              ,ISNULL ((select SendAmount from [Bighead_Mobile].[dbo].SendMoney  WHERE SaveTransactionNoDate is not null  AND CreateBy = em.EmpID AND SaveTransactionNoDate BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59' ),0) as Sendmoney, Ed.FirstName + ' ' + Ed.LastName AS Names , '".$searchDate."' AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName ,Em.EmpID,case when ed.SaleCode is null then '-' else ed.SaleCode end as SaleCode";
-
               $sql_case = $sql_select." ".$sql_body;
-
-              $sql_print = $sql_select." ".$sql_body;
-
               //echo $sql_case;
-              $file = fopen("../tsr_SaleReport/pages/sqlText.txt","w");
-              fwrite($file,$sql_case);
-              fclose($file);
-
-              $conns = connectDB_TSR();
-              // เพิ่มลงฐานข้อมูล
-              $sql_insert = "INSERT INTO TSR_Application.dbo.TSS_ReportCredit_2_sys (Empid,[SQLtext],addtime,rpttype) VALUES (?,?,GETDATE(),1)";
-      				//echo $sql_insert;
-
-      				$params = array($_COOKIE['tsr_emp_id'],$sql_print);
-      				//print_r($params);
-
-      				$stmt_insert = sqlsrv_query( $conns, $sql_insert, $params);
-
-      				if( $stmt_insert === false ) {
-      					 die( print_r( sqlsrv_errors(), true));
-      				}
 
               // เพิ่มลงฐานข้อมูล
               $num_row = checkNumRow($conn,$sql_case);
@@ -340,18 +272,6 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
               while ($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
                 $SumTotal = $SumTotal + $row['PAYAMT'];
                 $i++;
-                $httpExcel2 .= "<tr>
-                  <td style=\"text-align: center\">".$i."</td>
-                  <td>".$row['Names']."</td>
-                  <td>".$row['SaleCode']."</td>
-                  <td>#".$row['ReceiptCode']."</td>
-                  <td style=\"text-align: center\">".DateTimeThai($row['PaymentDueDate'])." น.</td>
-                  <td style=\"text-align: center\">".$row['PaymentPeriodNumber']."</td>
-                  <td style=\"text-align: center\">".$row['CONTNO']."</td>
-                  <td>".$row['CustomerName']."</td>
-                  <td style=\"text-align: right\">".number_format($row['PAYAMT'],2)."</td>
-                  <td style=\"text-align: right\">".number_format($row['PaymentAmount'],2)."</td>
-                </tr>";
               ?>
 
               <tr>
@@ -363,17 +283,11 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
                 <td><?=$row['CustomerName']?></td>
                 <td style="text-align: right"><?=number_format($row['PAYAMT'],2)?></td>
                 <td style="text-align: right"><?=number_format($row['PaymentAmount'],2)?></td>
-                <td style="text-align: right"><input type="checkbox" name="printID[<?=$row['ReceiptCode']?>]" class="flat-red" value="<?=$row['ReceiptCode']?>"></td>
+                <td style="text-align: center"><input type="checkbox" id='chkbox' name="printID[<?=$row['ReceiptCode']?>]" class="flat" value="<?=$row['ReceiptCode']?>"></td>
               </tr>
 
               <?php
                 }
-                $httpExcel3 = "</tbody>
-                <tfoot>
-                </tfoot>
-               </table>";
-                $html_file = $html_file = $httpExcelHead."".$httpExcel1."".$httpExcel2."".$httpExcel3;
-                write_data_for_export_excel($html_file, 'ReportCreditPar3');
                ?>
                </div>
              </tbody>
@@ -388,7 +302,7 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
             }
              ?>
             <input type="hidden" name="EmpID" value="<?=$EmpID?>">
-            <input type="submit" value="พิมพ์">
+            <button type="submit" class="btn btn-default"><i class="fa fa-print"></i></button>
           </form>
           </div>
           <div class="box-footer clearfix">
@@ -419,13 +333,14 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
           </tr>
         -->
         </table>
+        <!--
           <a href="export_excel.php?report_type=3"><img src="http://app.thiensurat.co.th/tsr_car/image/excel-icon.png" width="35" height="auto"> </a>
+        -->
           </div>
         </div>
         <?php
           }
           sqlsrv_close($conn);
-          sqlsrv_close($conns);
         ?>
         </div>
 
@@ -440,15 +355,51 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
   <script src="plugins/datatables/dataTables.bootstrap.min.js"></script>
   <script>
     $(function () {
-      $("#example1").DataTable();
-      $('#example2').DataTable({
+        var oTable =  $('#example2').DataTable({
+        //"stateSave": true
         "pageLength": 20,
-        "paging": true,
+        "paging": false,
         "lengthChange": false,
         "searching": false,
-        "ordering": true,
+        "ordering": false,
         "info": false,
-        "autoWidth": false
+        "autoWidth": true
       });
+
+      var allPages = oTable.cells( ).nodes( );
+
+      $('#CheckAll').click(function () {
+          if ($(this).hasClass('checkAll')) {
+              $(allPages).find('input[type="checkbox"]').prop('checked', false);
+          } else {
+              $(allPages).find('input[type="checkbox"]').prop('checked', true);
+          }
+          $(this).toggleClass('checkAll');
+      })
+
     });
+  </script>
+  <script type='text/javascript'>
+
+  function checkAll(id)
+  {
+  	elm=document.getElementsByTagName('input');
+  	for(i=0; i<elm.length ;i++){
+  		 if(elm[i].id==id){
+  				elm[i].checked = true ;
+  		  }
+  	   }
+
+  }
+
+  function uncheckAll(id)
+  {
+  	elm=document.getElementsByTagName('input');
+  	for(i=0; i<elm.length ;i++){
+  		 if(elm[i].id==id){
+  				elm[i].checked = false ;
+  		  }
+  	   }
+  }
+
   </script>

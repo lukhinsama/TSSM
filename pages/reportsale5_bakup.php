@@ -1,6 +1,6 @@
 <?php
-ini_set('display_errors', 'on');
-ini_set('error_reporting', E_ALL);
+//ini_set('display_errors', 'on');
+//ini_set('error_reporting', E_ALL);
 
 
 if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
@@ -13,35 +13,30 @@ if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
   $top = "";
 }
 
+
+/*
+  if (substr($_COOKIE['tsr_emp_id'],0,1) == "0") {
+    $EmpID['0'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
+    $EmpID['1'] = $_COOKIE['tsr_emp_name'];
+
+    $WHERE1 = "AND SaleTeamCode IN (SELECT DISTINCT TeamCode  FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent]  WHERE EmployeeCodeLV2 = '".$EmpID['0']."' OR EmployeeCodeLV3 = '".$EmpID['0']."' OR EmployeeCodeLV4 = '".$EmpID['0']."' OR EmployeeCodeLV5 = '".$EmpID['0']."' OR EmployeeCodeLV6 = '".$EmpID['0']."' OR ParentEmployeeCode = '".$EmpID['0']."')";
+}else {
+    $WHERE1 = "";
+}
+*/
 if (!empty($_REQUEST['EmpID'])) {
 
   if ($_REQUEST['EmpID'] == "7") {
     if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6) || ($_COOKIE['tsr_emp_permit'] == 13)) {
-      //$_REQUEST['EmpID'] = "A00098";
-      if(DateEng($_REQUEST['startDate']) > '2018-06-05' ){
-        $_REQUEST['EmpID'] = "A00094";
-      }else {
-        $_REQUEST['EmpID'] = "A00098";
-      }
+      $_REQUEST['EmpID'] = "A00098";
     }else {
       $_REQUEST['EmpID'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
     }
   }
-      $WHERE1 = "AND ((C.salecode IN
-        (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_all]
-          WHERE StatusType = 'sale' AND (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')
-           UNION ALL SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_ALL_BACKUP_20180604]
-           WHERE StatusType = 'sale' AND (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."'
-             OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."'
-             OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')))
-      OR (C.PreSaleEmployeeCode IN
-        (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_all]
-          WHERE StatusType = 'sale' AND (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')
-        UNION ALL SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_ALL_BACKUP_20180604]
-        WHERE StatusType = 'sale' AND (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."'
-          OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."'
-          OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."'
-          OR ParentEmployeeCode = '".$_REQUEST['EmpID']."'))))";
+    $WHERE1 = "AND ((C.salecode IN
+      (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent]  WHERE (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')))
+    OR (C.PreSaleEmployeeCode IN
+      (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent]  WHERE (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."'))))";
 }else {
     //$_REQUEST['EmpID'] = "A00098";
     if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6) || ($_COOKIE['tsr_emp_permit'] == 13)) {
@@ -58,7 +53,7 @@ if (!empty($_REQUEST['EmpID'])) {
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="row">
-        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportsale5_test">
+        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportsale5">
         <div class="col-md-2">
           <h4>
             รายงานติดตั้ง
@@ -163,10 +158,8 @@ if (!empty($_REQUEST['EmpID'])) {
         </div>
 
         <div class="col-md-1">
-          <?php
-          echo PrintButton($_COOKIE['tsr_emp_id'],'11','7',$_COOKIE['tsr_emp_permit']);
-          ?>
-          <!--<a href="http://app.thiensurat.co.th/lkh/rpt.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=11&rpt=7" target="_blank" class="btn btn-default"> <i class="fa fa-print"></i> </a>-->
+
+          <a href="http://app.thiensurat.co.th/lkh/rpt.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=11&rpt=7" target="_blank" class="btn btn-default"> <i class="fa fa-print"></i> </a>
         </div>
         </form>
       </div>
@@ -190,7 +183,7 @@ if (!empty($_REQUEST['EmpID'])) {
 
             <?php
             $httpExcelHead = "<P><center><B>รายงานสรุปการเก็บเงิน</B></center></P>
-          <P><center><B> ประจำวันที่ : ".$searchDate." พิมพ์โดย : ".$_COOKIE['tsr_emp_name']."</B></center></P>";
+          <P><center><B> พนักงานเก็บเงิน : ".$EmpID['0']." , ".$EmpID['2']." ประจำวันที่ : ".$searchDate." พิมพ์โดย : ".$_COOKIE['tsr_emp_name']."</B></center></P>";
 
              ?>
 
@@ -246,8 +239,6 @@ if (!empty($_REQUEST['EmpID'])) {
                 <th style=\"text-align: center\">ที่อยู่เก็บเงิน</th>
                 <th style=\"text-align: center\">ที่อยู่ตามบัตร</th>
                 <th style=\"text-align: center\">โทร</th>
-                <th style=\"text-align: center\">ช่วงเวลา</th>
-                <th style=\"text-align: center\">สายงาน</th>
               </tr>
             </thead>
             <tbody>";
@@ -285,13 +276,6 @@ if (!empty($_REQUEST['EmpID'])) {
   ,(SELECT TOP 1 PaymentPeriodNumber FROM [Bighead_Mobile].[dbo].[SalePaymentPeriod] WHERE Refno =
   C.Refno AND PaymentComplete = 1 ORDER BY PaymentPeriodNumber DESC) as PaymentPeriodNumber
   ,PD.ProductName
-  ,case
- when CAST(EFFDATE as time) >= '00:00:00' and  CAST(EFFDATE as time) < '11:59:59' then 'ก่อนเที่ยง'
- when CAST(EFFDATE as time) >= '12:00:00' and  CAST(EFFDATE as time) < '14:59:59' then 'หลังเที่ยงถึงบ่ายสาม'
- when CAST(EFFDATE as time) >= '15:00:00' and  CAST(EFFDATE as time) < '17:59:59' then 'บ่ายสามถึงหกโมงเย็น'
- when CAST(EFFDATE as time) >= '18:00:00' then 'หกโมงเย็นขึ้นไป'
-end as timeSet
-,left(c.salecode,2) as LineWork
   FROM [Bighead_Mobile].[dbo].[Contract] AS C
   INNER JOIN [TSRData_Source].[dbo].[vw_DebtorCustomer] AS DC  ON c.CustomerID = DC.CustomerID
   INNER JOIN Bighead_Mobile.dbo.Employee AS E ON E.empID = C.saleEmployeecode
@@ -306,9 +290,9 @@ end as timeSet
               $sql_print = $sql_select." ".$orderbysalecode;
 
               //echo $sql_case;
-              //$file = fopen("../tsr_SaleReport/pages/sqlText.txt","w");
-              //fwrite($file,$sql_case);
-              //fclose($file);
+              $file = fopen("../tsr_SaleReport/pages/sqlText.txt","w");
+              fwrite($file,$sql_case);
+              fclose($file);
 
               $conns = connectDB_TSR();
               // เพิ่มลงฐานข้อมูล
@@ -360,8 +344,6 @@ end as timeSet
                   <th style=\"text-align: center\">".$row['AddressPayment']."</td>
                   <th style=\"text-align: center\">".$row['AddressIDCard']."</td>
                   <th style=\"text-align: center\">".$row['AddressInstallTel']."</td>
-                  <th style=\"text-align: center\">".$row['timeSet']."</td>
-                  <th style=\"text-align: center\">".$row['LineWork']."</td>
                 </tr>";
 
                 if (($_COOKIE['tsr_emp_permit'] == 1 ) || ($_COOKIE['tsr_emp_permit'] == 2 ) || ($_COOKIE['tsr_emp_permit'] == 6)){
@@ -436,7 +418,7 @@ end as timeSet
         <?php
           }
           sqlsrv_close($conn);
-          //sqlsrv_close($conns);
+          sqlsrv_close($conns);
         ?>
         </div>
 

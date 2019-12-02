@@ -56,7 +56,60 @@ if (!empty($_REQUEST['contno'])) {
        die( print_r( sqlsrv_errors(), true));
     }
   }
+
+  //หาข้อมูลจาก CArea
+  $sqlCArea = "SELECT top 1 CCode,Name,EmpId,ACode,MCode
+  FROM [TSRData_Source].[dbo].[CArea]
+  WHERE EmpId IN (select top 1 EmployeeCode from Bighead_Mobile.dbo.EmployeeDetail WHERE SaleCode = '".$_REQUEST['AssigneeEmpID']."')";
+
+  $stmtCArea = sqlsrv_query($conn,$sqlCArea);
+  while ($CArea = sqlsrv_fetch_array( $stmtCArea, SQLSRV_FETCH_ASSOC)) {
+    $CCode = $CArea['CCode'];
+    $Name = $CArea['Name'];
+    $Empid = $CArea['EmpId'];
+    $ACode = $CArea['ACode'];
+    $MCode = $CArea['MCode'];
+  }
   sqlsrv_close($conn);
+
+
+  $sql = "EXEC TSR_Application.dbo.sp_DebtorAnalyze_Update_CashCode_CBighead
+  @V_refno = '".$_REQUEST['ContRefno']."'";
+
+  $con = connectDB_TSR();
+  $stmt1 = sqlsrv_query( $con, $sql );
+  if( $stmt === false ) {
+       die( print_r( sqlsrv_errors(), true));
+  }
+
+  //สโตจาร์ยอู๊ด
+  $sql = "EXEC TSR_Application.dbo.Cms_CreditFrom_Trans_BH
+          @RefNo = '".$_REQUEST['ContRefno']."',
+          @CashCode = '".$CCode."',
+          @CashName = '".$Name."',
+          @EmpId = '".$Empid."',
+          @AreaCode = '".$ACode."',
+          @BHCode = '".$MCode."',
+          @Remark = 'TSSM',
+          @CreateBy = '".$_REQUEST['CreateBy']."'";
+
+          $stmt1 = sqlsrv_query( $con, $sql );
+          if( $stmt === false ) {
+               die( print_r( sqlsrv_errors(), true));
+          }
+
+  $sql = "Exec TSR_Application.dbo.Cms_CashCode_Trans_Log_Save
+          @ContNo = '".$_REQUEST['contno']."',
+          @RefNo = '".$_REQUEST['ContRefno']."',
+          @CashCode = '".$CCode."',
+          @CreateBy = '".$_REQUEST['CreateBy']."'";
+
+          $stmt1 = sqlsrv_query( $con, $sql );
+          if( $stmt === false ) {
+               die( print_r( sqlsrv_errors(), true));
+          }
+
+  sqlsrv_close($con);
 }
  ?>
   <!-- Content Wrapper. Contains page content -->
@@ -138,6 +191,7 @@ if (!empty($_REQUEST['contno'])) {
                 ,con.ContractReferenceNo AS ContRefno
                 ,case when len(con.RefNo) > 9 then 'B' else 'R' end as colorStatus
                 ,case when con.service = '00000000' then salecode else con.service end as service
+                ,ISNULL((SELECT top 1 P.payamt FROM [TSS_PRD].Bighead_Mobile.dbo.Payment AS P INNER JOIN [TSS_PRD].Bighead_Mobile.dbo.TRIP AS T ON P.tripId = T.tripid where refno = con.refno AND GETDATE() BETWEEN T.startdate and T.enddate),0) AS disStatus
                 FROM [TSS_PRD].[Bighead_Mobile].[dbo].vw_Last_Assign as ass WITH(NOLOCK)
                 left join [TSS_PRD].[Bighead_Mobile].[dbo].[vw_ContactActive] as con WITH(NOLOCK)
                 on ass.RefNo = con.RefNo
@@ -220,8 +274,9 @@ if (!empty($_REQUEST['contno'])) {
                   </td>
                   <td style="text-align: center">
                     <input type="hidden" name="contno" value="<?=$row['contno'];?>">
-                    <input type="hidden" name="CreateBy" value="<?=$_COOKIE['tsr_emp_id'];?>">
-                    <button type="summit" class="btn btn-block btn-warning"> บันทึก </button></td>
+                    <input type="hidden" name="ContRefno" value="<?=$row['ContRefno'];?>">
+                    <input type="hidden" name="CreateBy" value="<?="A".substr($_COOKIE['tsr_emp_id'],1,5);?>">
+                    <button type="summit" class="btn btn-block btn-warning" <?php /*if ($row['disStatus'] >= $row['netamount']) {echo "disabled";}*/?>> บันทึก </button></td>
                 </tr>
                 <?php
                   }

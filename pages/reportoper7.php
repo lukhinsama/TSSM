@@ -204,13 +204,13 @@ if (!empty($_REQUEST['TeamCode']) ) {
               from (
               SELECT Receipt.ReceiptCode, Receipt.TotalPayment, SUM(SalePaymentPeriodPayment.CloseAccountDiscountAmount) AS Discount
               ,Receipt.TotalPayment-SUM(SalePaymentPeriodPayment.CloseAccountDiscountAmount) AS Discounts, SUM(SalePaymentPeriodPayment.Amount) AS NetPayment, Receipt.RefNo,Receipt.DatePayment, Receipt.CreateBy
-              FROM Receipt INNER JOIN SalePaymentPeriodPayment ON Receipt.ReceiptID = SalePaymentPeriodPayment.ReceiptID
+              FROM TSRData_Source.dbo.vw_ReceiptWithZone AS Receipt INNER JOIN SalePaymentPeriodPayment ON Receipt.ReceiptID = SalePaymentPeriodPayment.ReceiptID
               INNER JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = SalePaymentPeriodPayment.SalePaymentPeriodID AND S.PaymentComplete = 0
               WHERE $WHERE AND TotalPayment > 0
               GROUP BY Receipt.ReceiptCode, Receipt.TotalPayment, Receipt.RefNo, Receipt.DatePayment, Receipt.CreateBy)
               AS vw_PaymentSummary
               inner join EmployeeDetail emp on vw_PaymentSummary.CreateBy = emp.EmployeeCode
-              where $WHERE2
+
               )
               AS vw_ReceiptByEmployee
               group by CCode, Name ,SupCode

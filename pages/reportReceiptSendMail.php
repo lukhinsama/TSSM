@@ -1,39 +1,24 @@
 <?php
 //ini_set('display_errors', 'on');
 //ini_set('error_reporting', E_ALL);
-$limit_per_page = 100;
-$page = (isset($_GET['page'])) ? intval($_GET['page']) : 1;
-$limit_start = (($page - 1) * $limit_per_page) + 1;
-$limit_end = ($page) * $limit_per_page;
-/*
-if (empty($_REQUEST['yearPark'])) {
-  $selectYear = date("Y");
-  $selectPak = 1;
-}else {
-  $yearPark = $_REQUEST['yearPark'];
-  $sprit  = explode("_",$yearPark);
-  $selectYear = $sprit[1];
-  $selectPak = $sprit[0];
-}
-*/
 
 if (empty($_REQUEST['searchDate'])) {
   $searchDate = DateThai(date('Y-m-d'));
-  $WHERE = " datediff(DAY,A.paydate,GETDATE())=0 ";
+  $WHERE = " datediff(DAY,R.DatePayment,GETDATE())=0 ";
   $top = "TOP 10";
 }else {
   $searchDate = DateThai(DateEng($_REQUEST['searchDate']));
-  $WHERE = " AND A.paydate BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59'";
+  $WHERE = " R.DatePayment BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59'";
   $top = "";
 }
 
 if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
   $searchDate = DateThai(date('Y-m-d'));
-  $WHERE = " datediff(DAY,A.paydate,GETDATE())=0 ";
+  $WHERE = " datediff(DAY,R.DatePayment,GETDATE())=0 ";
   $top = "TOP 10";
 }else {
   $searchDate = DateThai(DateEng($_REQUEST['startDate']))." - ".DateThai(DateEng($_REQUEST['endDate']));
-  $WHERE = " AND A.paydate BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
+  $WHERE = " R.DatePayment BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
   $top = "";
 }
 
@@ -54,7 +39,7 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
 
     sqlsrv_close($connss);
 
-    $WHERE .= " AND A.CashCode = '".$EmpID['2']."'";
+    $WHERE .= " AND R.ZoneCode = '".$EmpID['2']."'";
 
 
   }
@@ -63,56 +48,9 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
     $EmpID = array('0','-');
   }else {
     $EmpID = explode("_",$_REQUEST['EmpID']);
-    $WHERE .= " AND A.CashCode = '".$EmpID['2']."'";
+    $WHERE .= " AND R.CashCode = '".$EmpID['2']."'";
   }
 }
-
-if (!empty($_REQUEST['Chk'])) {
-  # code...
-  //echo $_REQUEST['Chk'];
-
-  if ($_REQUEST['Chk'] == 'chkYes') {
-    # code...
-    $WHERE2 = "WHERE printOrder <> 0";
-  }elseif ($_REQUEST['Chk'] == 'chkNo') {
-    # code...
-    $WHERE2 = "WHERE printOrder = 0";
-  }else {
-    # code...
-    $WHERE2 = "";
-  }
-
-}else {
-  $WHERE2 = "";
-}
-
-/*
-if (!empty($_REQUEST['sortcontno'])) {
-  if ($_REQUEST['sortcontno'] == "ASC") {
-    $sort = "ORDER BY CONTNO";
-    $sortcontno = "DESC";
-    $sortreceipt = "DESC";
-  }else {
-    $sort = "ORDER BY CONTNO DESC";
-    $sortcontno = "ASC";
-    $sortreceipt = "DESC";
-  }
-}elseif(!empty($_REQUEST['sortreceipt'])) {
-  if ($_REQUEST['sortreceipt'] == "ASC") {
-    $sort = "ORDER BY ReceiptCode";
-    $sortreceipt = "DESC";
-    $sortcontno = "ASC";
-  }else {
-    $sort = "ORDER BY ReceiptCode DESC";
-    $sortreceipt = "ASC";
-    $sortcontno = "ASC";
-  }
-}else {
-  $sort = "ORDER BY ReceiptCode,PaymentPeriodNumber";
-  $sortcontno = "ASC";
-  $sortreceipt = "DESC";
-}
-*/
   $conn = connectDB_BigHead();
  ?>
   <!-- Content Wrapper. Contains page content -->
@@ -120,13 +58,13 @@ if (!empty($_REQUEST['sortcontno'])) {
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="row">
-        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportoper9">
-        <div class="col-md-2">
+        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportReceiptSendMail">
+        <div class="col-md-3">
           <h4>
-            รายงานใบเสร็จมือ
+            รายงานใบเสร็จส่งจดหมาย
           </h4>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
           <?php
           if (($_COOKIE['tsr_emp_permit'] != 4)) {
            ?>
@@ -154,9 +92,6 @@ if (!empty($_REQUEST['sortcontno'])) {
                   <option value="0"> ทั้งหมด </option>
                   <?php
                 }
-
-                //$sql_case = "SELECT  CCode,Name,EmpID FROM [TsrData_source].[dbo].[CArea] WHERE EmpId is not null AND EmpId != '' ORDER BY EmpId ";
-                //$sql_case = "SELECT CCode,mcode,Name,EmpID ,case when ed.SaleCode is null then '-' else ed.SaleCode end as SaleCode ,SupervisorCode FROM [TsrData_source].[dbo].[CArea] AS C LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = c.EmpID AND salecode is not null WHERE EmpId is not null AND EmpId != '' AND SupervisorCode is not null $supcode ORDER BY ccode";
                 $sql_case = "SELECT SaleCode as mcode,EmployeeName AS Name ,EmployeeCode AS EmpID,case when SaleCode is null then '-' else SaleCode end as SaleCode ,SupervisorCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE  salecode is not null AND SupervisorCode is not null $supcode ORDER BY mcode";
 
                 //echo $sql_case;
@@ -174,17 +109,11 @@ if (!empty($_REQUEST['sortcontno'])) {
         }
            ?>
         </div>
-        <div class="col-md-2">
-          <input type="radio" name="Chk" value="chkAll" checked> ทั้งหมด</BR>
-          <input type="radio" name="Chk" value="chkYes"> ที่มีพิมพ์ใบเสร็จ</BR>
-          <input type="radio" name="Chk" value="chkNo"> ไม่มีพิมพ์ใบเสร็จ
-        </div>
         <div class="col-md-4">
           <div class="input-group input-group">
             <div class="input-group-addon">
               <i class="fa fa-calendar"></i>
             </div>
-            <!--<input type="text" class="form-control" name="searchDate" autocomplete="off" id="datepicker2"  placeholder="กรอกวันที่ .." required>-->
 
             <div class="input-group input-group input-daterange" id="datepicker2">
                     <input type="text" class="form-control" name="startDate" autocomplete="off" value="<?php if(isset($_REQUEST['startDate'])) {echo $_REQUEST['startDate'];}?>" placeholder="วันเริ่มต้น .." required>
@@ -199,18 +128,12 @@ if (!empty($_REQUEST['sortcontno'])) {
         </div>
 
         <div class="col-md-1">
-          <a href="http://app.thiensurat.co.th/lkh/rpt_lk6.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=10" target="_blank" class="btn btn-default"> <i class="fa fa-print"></i> </a>
+          <!--
+          <a href="http://app.thiensurat.co.th/lkh/rpt_lk1.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=1" target="_blank" class="btn btn-default"> <i class="fa fa-print"></i> </a>
+        -->
         </div>
         </form>
       </div>
-
-      <!--
-      <ol class="breadcrumb">
-        <li><a href="index.php?pages=info"><i class="fa fa-user"></i> รายงาน</a></li>
-        <li><i class="fa fa-user"></i> รายงาน(ฝ่ายเครดิต)</li>
-        <li class="active"> สรุปการเก็บเงินรายวัน </li>
-      </ol>
-    -->
 
     </section>
 
@@ -226,8 +149,7 @@ if (!empty($_REQUEST['sortcontno'])) {
            ?>
           <div class="box box-info">
             <div class="box-header with-border">
-
-              <P><center><B>รายงานใบเสร็จมือ</B></center></P>
+              <P><center><B>รายงานสรุปการเก็บเงิน</B></center></P>
               <table width="100%">
                 <tr>
                   <td>พนักงานเก็บเงิน : <?=$EmpID['0']?> , <?=$EmpID['2']?> , <?=$EmpID['3']?></td>
@@ -238,8 +160,9 @@ if (!empty($_REQUEST['sortcontno'])) {
               </table>
             </div>
             <?php
-            $httpExcelHead = "<P><center><B>รายงานใบเสร็จมือ</B></center></P>
+            $httpExcelHead = "<P><center><B>รายงานสรุปการเก็บเงิน</B></center></P>
           <P><center><B> พนักงานเก็บเงิน : ".$EmpID['0']." , ".$EmpID['2']." ประจำวันที่ : ".$searchDate." พิมพ์โดย : ".$_COOKIE['tsr_emp_name']."</B></center></P>";
+
              ?>
 
           <!--<div class="box-body table-responsive no-padding">-->
@@ -248,16 +171,13 @@ if (!empty($_REQUEST['sortcontno'])) {
             <table id="example2" class="table table-hover table-striped">
               <thead>
               <tr>
-                <th style="text-align: center">เขต</th>
+                <th style="text-align: center">ลำดับ</th>
                 <th style="text-align: center">เลขที่ใบเสร็จ</th>
                 <th style="text-align: center">เวลาออกใบเสร็จ</th>
                 <th style="text-align: center">งวดที่</th>
                 <th style="text-align: center">เลขที่สัญญา</th>
-                <th style="text-align: center">เล่มใบเสร็จมือ</th>
-                <th style="text-align: center">เลขใบเสร็จมือ</th>
                 <th style="text-align: center">ชื่อ - สกุล</th>
                 <th style="text-align: center">จำนวนเงิน</th>
-                <th style="text-align: center">จำนวนพิมพ์</th>
               </tr>
             </thead>
             <tbody>
@@ -267,66 +187,100 @@ if (!empty($_REQUEST['sortcontno'])) {
               <thead>
               <tr>
                 <th style=\"text-align: center\">ลำดับ</th>
-                <th style=\"text-align: center\">ชื่อพนักงานเก็บเงิน</th>
-                <th style=\"text-align: center\">รหัสเขตเก็บเงิน</th>
+                <th style=\"text-align: center\">วันที่รับเงิน</th>
                 <th style=\"text-align: center\">เลขที่ใบเสร็จ</th>
-                <th style=\"text-align: center\">เวลาออกใบเสร็จ</th>
+                <th style=\"text-align: center\">เลขสัญญา</th>
+                <th style=\"text-align: center\">ชื่อ-สกุล (ลูกค้า)</th>
+                <th style=\"text-align: center\">ผลิตภัฒฑ์</th>
                 <th style=\"text-align: center\">งวดที่</th>
-                <th style=\"text-align: center\">เลขที่สัญญา</th>
-                <th style=\"text-align: center\">เล่มใบเสร็จมือ</th>
-                <th style=\"text-align: center\">เลขใบเสร็จมือ</th>
-                <th style=\"text-align: center\">ชื่อ - สกุล</th>
                 <th style=\"text-align: center\">จำนวนเงิน</th>
-                <th style=\"text-align: center\">จำนวนพิมพ์</th>
+                <th style=\"text-align: center\">งวดคงเหลือ</th>
+                <th style=\"text-align: center\">จำนวนเงินคงเหลือ</th>
+                <th style=\"text-align: center\">ผู้รับเงิน</th>
+                <th style=\"text-align: center\">เขตเก็บเงิน</th>
+                <th style=\"text-align: center\">ที่อยู่ตามบัตร</th>
+                <th style=\"text-align: center\">ตำบล/แขวง ตามบัตร</th>
+                <th style=\"text-align: center\">อำเภอ/เขต ตามบัตร</th>
+                <th style=\"text-align: center\">จังหวัดตามบัตร</th>
+                <th style=\"text-align: center\">รหัสไปรษณีย์ตามบัตร</th>
+                <th style=\"text-align: center\">ที่อยู่ติดตั้ง</th>
+                <th style=\"text-align: center\">ตำบล/แขวง ติดตั้ง</th>
+                <th style=\"text-align: center\">อำเภอ/เขต ติดตั้ง</th>
+                <th style=\"text-align: center\">จังหวัดติดตั้ง</th>
+                <th style=\"text-align: center\">รหัสไปรษณีย์ติดตั้ง</th>
+                <th style=\"text-align: center\">สาขา</th>
+                <th style=\"text-align: center\">เลขผู้เสียภาษี</th>
+                <th style=\"text-align: center\">ที่อยู่สาขา</th>
               </tr>
             </thead>
             <tbody>";
                 $httpExcel2 = "";
 
-              $sql_select = "SELECT DISTINCT
-              R.ReceiptCode
-              ,R.TotalPayment
-              ,A.BookNo
-              ,A.ReceiptNo
-              ,P.CashCode
-              ,A.CashName
-              ,A.ContNo
-              ,A.CustName
-              ,A.PayPeriod AS PaymentPeriodNumber
-              ,A.paydate
-              ,CONVERT(varchar(20),A.paydate,105) +' '+ CONVERT(varchar(5),A.paydate,108) as PaymentDueDate
-              ,A.Amount
-              ,ISNULL((SELECT MAX(PrintOrder) FROM Bighead_Mobile.dbo.DocumentHistory WHERE DocumentNumber = R.ReceiptID GROUP BY DocumentNumber) ,0) AS PrintOrder
-              from [Bighead_Mobile].[dbo].MigrateReportDailyInvoiceA AS A
-              INNER JOIN Bighead_Mobile.dbo.Receipt AS R ON R.ReceiptCode = A.InvNo
-              INNER JOIN Bighead_Mobile.dbo.payment AS P on R.paymentId = p.paymentId
-              where (A.BookNo IS NOT NULL OR A.ReceiptNo IS NOT NULL) $WHERE";
+              $SQL = "SELECT [RefNo]
+      ,[ReceiptCode]
+      ,[DatePayment]
+      ,[TotalPayment]
+      ,[CreateBy]
+      ,[CONTNO]
+      ,[ContractReferenceNo]
+      ,[Amount]
+      ,[PAYAMT]
+      ,[CashCode]
+      ,[EmpID]
+      ,[TeamCode]
+      ,[PaymentPeriodNumber]
+      ,[PaymentAmount]
+      ,[NetAmount]
+      ,[PaymentComplete]
+      ,[Discount]
+      ,[CloseAccountDiscountAmount]
+      ,[CustomerName]
+      ,[ProductName]
+      ,[BalancePeriodNumber]
+      ,[BalanceAmount]
+      ,[EmpName]
+      ,[HouseIDCard]
+      ,[SubDistrictIDCard]
+      ,[DistrictIDCard]
+      ,[ProvinceIDCard]
+      ,[ZipcodeIDCard]
+      ,[HouseInstall]
+      ,[SubDistrictInstall]
+      ,[DistrictInstall]
+      ,[ProvinceInstall]
+      ,[ZipcodeInstall]
+      ,[Branch]
+      ,[BranchAddress]
+      ,[TexNo]
+      ,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as DatePayments
+  FROM TSRData_Source.dbo.TSSM_ReceiptDataSendMail AS R
+  WHERE $WHERE ";
+  //ECHO $SQL;
 
-              $sql_case = "SELECT * FROM (".$sql_select.") AS ABC $WHERE2 ";
+              $sql_case = $SQL;
 
-              //$sql_case = $sql_select;
-
-              $sql_print = $sql_case;
+              $sql_print = $SQL;
 
               //echo $sql_case;
               $file = fopen("../tsr_SaleReport/pages/sqlText.txt","w");
-              fwrite($file,$sql_case);
+              fwrite($file,$SQL);
               fclose($file);
 
               $conns = connectDB_TSR();
               // เพิ่มลงฐานข้อมูล
-              $sql_insert = "INSERT INTO TSR_Application.dbo.TSS_ReportCredit_2_sys (Empid,[SQLtext],addtime,rpttype) VALUES (?,?,GETDATE(),10)";
+              //$sql_insert = "INSERT INTO TSR_Application.dbo.TSS_ReportCredit_2_sys (Empid,[SQLtext],addtime,rpttype) VALUES (?,?,GETDATE(),1)";
       				//echo $sql_insert;
 
-      				$params = array($_COOKIE['tsr_emp_id'],$sql_print);
+      				//$params = array($_COOKIE['tsr_emp_id'],$sql_print);
       				//print_r($params);
 
-      				$stmt_insert = sqlsrv_query( $conns, $sql_insert, $params);
-
+      				//$stmt_insert = sqlsrv_query( $conns, $sql_print, $params);
+              /*
       				if( $stmt_insert === false ) {
       					 die( print_r( sqlsrv_errors(), true));
       				}
-
+              */
+              sqlsrv_close($conns);
               // เพิ่มลงฐานข้อมูล
               $num_row = checkNumRow($conn,$sql_case);
               $SumTotal = 0 ;
@@ -338,31 +292,41 @@ if (!empty($_REQUEST['sortcontno'])) {
                 $i++;
                 $httpExcel2 .= "<tr>
                   <td style=\"text-align: center\">".$i."</td>
-                  <td>".$row['CashName']."</td>
-                  <td>".$row['CashCode']."</td>
-                  <td>#".$row['ReceiptCode']."</td>
-                  <td style=\"text-align: center\">".DateTimeThai($row['PaymentDueDate'])." น.</td>
+                  <td>".$row['DatePayments']."</td>
+                  <td>'".$row['ReceiptCode']."</td>
+                  <td style=\"text-align: center\">".$row['CONTNO']."</td>
+                  <td>".$row['CustomerName']."</td>
+                  <td>".$row['ProductName']."</td>
                   <td style=\"text-align: center\">".$row['PaymentPeriodNumber']."</td>
-                  <td style=\"text-align: center\">".$row['ContNo']."</td>
-                  <td style=\"text-align: center\">".$row['BookNo']."</td>
-                  <td style=\"text-align: center\">".$row['ReceiptNo']."</td>
-                  <td>".$row['CustName']."</td>
                   <td style=\"text-align: right\">".number_format($row['TotalPayment'],2)."</td>
-                  <td style=\"text-align: center\">".$row['PrintOrder']."</td>
+                  <td style=\"text-align: center\">'".$row['BalancePeriodNumber']."</td>
+                  <td style=\"text-align: right\">".number_format($row['BalanceAmount'],2)."</td>
+                  <td>".$row['EmpName']."</td>
+                  <td>".$row['CashCode']."</td>
+                  <td>".$row['HouseIDCard']."</td>
+                  <td>".$row['SubDistrictIDCard']."</td>
+                  <td>".$row['DistrictIDCard']."</td>
+                  <td>".$row['ProvinceIDCard']."</td>
+                  <td>".$row['ZipcodeIDCard']."</td>
+                  <td>".$row['HouseInstall']."</td>
+                  <td>".$row['SubDistrictInstall']."</td>
+                  <td>".$row['DistrictInstall']."</td>
+                  <td>".$row['ProvinceInstall']."</td>
+                  <td>".$row['ZipcodeInstall']."</td>
+                  <td>".$row['Branch']."</td>
+                  <td>'".$row['TexNo']."</td>
+                  <td>".$row['BranchAddress']."</td>
                 </tr>";
               ?>
 
               <tr>
-                <td><?=$row['CashCode']?></td>
+                <td style="text-align: center"><?=$i?></td>
                 <td><?=$row['ReceiptCode']?></td>
-                <td style="text-align: center"><?=DateTimeThai($row['PaymentDueDate'])?> น.</td>
+                <td style="text-align: center"><?=DateTimeThai($row['DatePayments'])?> น.</td>
                 <td style="text-align: center"><?=$row['PaymentPeriodNumber']?></td>
-                <td style="text-align: center"><?=$row['ContNo']?></td>
-                <td style="text-align: center"><?=$row['BookNo']?></td>
-                <td style="text-align: center"><?=$row['ReceiptNo']?></td>
-                <td><?=$row['CustName']?></td>
-                <td style="text-align: right"><?=number_format($row['TotalPayment'],2)?></td>
-                <td style="text-align: center"><?=$row['PrintOrder']?></td>
+                <td style="text-align: center"><?=$row['CONTNO']?></td>
+                <td><?=$row['CustomerName']?></td>
+                <td style="text-align: right"><?=number_format($row['PAYAMT'],2)?></td>
               </tr>
 
               <?php
@@ -371,8 +335,8 @@ if (!empty($_REQUEST['sortcontno'])) {
                 <tfoot>
                 </tfoot>
                </table>";
-               $html_file = $httpExcelHead."".$httpExcel1."".$httpExcel2."".$httpExcel3;
-                write_data_for_export_excel($html_file, 'ReportCreditPar3');
+                $html_file = $html_file = $httpExcel1."".$httpExcel2."".$httpExcel3;
+                write_data_for_export_excel($html_file, 'ReportCreditCom2');
                ?>
              </tbody>
              <tfoot>
@@ -381,15 +345,6 @@ if (!empty($_REQUEST['sortcontno'])) {
 
           </div>
           <div class="box-footer clearfix">
-            <!--
-            <ul class="pagination pagination-sm no-margin pull-right">
-              <li><a href="#">&laquo;</a></li>
-              <li><a href="#">1</a></li>
-              <li><a href="#">2</a></li>
-              <li><a href="#">3</a></li>
-              <li><a href="#">&raquo;</a></li>
-            </ul>
-          -->
           <table width="100%">
           <tr>
             <td style="text-align: right" width="10%"><B>รวม</B> </td>
@@ -398,23 +353,14 @@ if (!empty($_REQUEST['sortcontno'])) {
             <td style="text-align: right"><B> รวมเงิน </B></td>
             <td style="text-align: right" width="15%"><?=number_format($SumTotal,2)?></td>
           </tr>
-          <!--
-          <tr>
-            <td style="text-align: right" width="10%"> </td>
-            <td style="text-align: right" width="5%"> </td>
-            <td style="text-align: left" width="10%"></td>
-            <td style="text-align: right"><B> ยอดส่งเงิน </B></td>
-            <td style="text-align: right" width="15%"><?=number_format($Sendmoney,2)?></td>
-          </tr>
-        -->
         </table>
-          <a href="export_excel.php?report_type=3"><img src="http://app.thiensurat.co.th/tsr_car/image/excel-icon.png" width="35" height="auto"> </a>
+          <a href="export_csv.php?report_type=8"><img src="http://app.thiensurat.co.th/tsr_car/image/excel-icon.png" width="35" height="auto"> </a>
           </div>
         </div>
         <?php
           }
           sqlsrv_close($conn);
-          sqlsrv_close($conns);
+
         ?>
         </div>
 
@@ -427,7 +373,6 @@ if (!empty($_REQUEST['sortcontno'])) {
   <link rel="stylesheet" href="plugins/datatables/dataTables.bootstrap.css">
   <script src="plugins/datatables/jquery.dataTables.min.js"></script>
   <script src="plugins/datatables/dataTables.bootstrap.min.js"></script>
-
   <script>
     $(function () {
       $("#example1").DataTable();
@@ -441,13 +386,4 @@ if (!empty($_REQUEST['sortcontno'])) {
         "autoWidth": false
       });
     });
-  </script>
-
-  <script>
-  $(document).ready(function(){
-    $('input').iCheck({
-      checkboxClass: 'icheckbox_flat-blue',
-      radioClass: 'iradio_flat-blue'
-    });
-  });
   </script>

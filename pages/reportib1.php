@@ -1,21 +1,7 @@
 <?php
-//ini_set('display_errors', 'on');
-//ini_set('error_reporting', E_ALL);
-$limit_per_page = 100;
-$page = (isset($_GET['page'])) ? intval($_GET['page']) : 1;
-$limit_start = (($page - 1) * $limit_per_page) + 1;
-$limit_end = ($page) * $limit_per_page;
-/*
-if (empty($_REQUEST['yearPark'])) {
-  $selectYear = date("Y");
-  $selectPak = 1;
-}else {
-  $yearPark = $_REQUEST['yearPark'];
-  $sprit  = explode("_",$yearPark);
-  $selectYear = $sprit[1];
-  $selectPak = $sprit[0];
-}
-*/
+ini_set('display_errors', 'on');
+ini_set('error_reporting', E_ALL);
+
 
 if (empty($_REQUEST['searchDate'])) {
   $searchDate = DateThai(date('Y-m-d'));
@@ -23,7 +9,7 @@ if (empty($_REQUEST['searchDate'])) {
   $top = "TOP 10";
 }else {
   $searchDate = DateThai(DateEng($_REQUEST['searchDate']));
-  $WHERE = " RV.LastUpdateDate BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59'";
+  $WHERE = " R.DatePayment BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59'";
   $top = "";
 }
 
@@ -33,7 +19,7 @@ if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
   $top = "TOP 10";
 }else {
   $searchDate = DateThai(DateEng($_REQUEST['startDate']))." - ".DateThai(DateEng($_REQUEST['endDate']));
-  $WHERE = " RV.LastUpdateDate BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
+  $WHERE = " R.DatePayment BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
   $top = "";
 }
 
@@ -43,31 +29,30 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
     $EmpID['1'] = $_COOKIE['tsr_emp_name'];
 
     $WHERE .= "AND R.ZoneCode IN (
-      SELECT DISTINCT Salecode  FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent] WHERE (EmployeeCodeLV2 = '".$EmpID['0']."' OR EmployeeCodeLV3 = '".$EmpID['0']."'   OR EmployeeCodeLV4 = '".$EmpID['0']."' OR EmployeeCodeLV5 = '".$EmpID['0']."' OR EmployeeCodeLV6 = '".$EmpID['0']."' OR ParentEmployeeCode = '".$EmpID['0']."')  )
- ";
-
-
+      SELECT DISTINCT Salecode  FROM [TSRData_Source].[dbo].[EmployeeDataParent_ALL] WHERE StatusType = 'ib' AND (EmployeeCodeLV2 = '".$EmpID['0']."' OR EmployeeCodeLV3 = '".$EmpID['0']."'
+        OR EmployeeCodeLV4 = '".$EmpID['0']."' OR EmployeeCodeLV5 = '".$EmpID['0']."' OR EmployeeCodeLV6 = '".$EmpID['0']."' OR ParentEmployeeCode = '".$EmpID['0']."')  ) ";
   }
 }else {
   if (!empty($_REQUEST['EmpID'])) {
 
     if ($_REQUEST['EmpID'] == "7") {
       if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6)) {
-        $_REQUEST['EmpID'] = "A00098";
+        $_REQUEST['EmpID'] = "A39768";
       }else {
         $_REQUEST['EmpID'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
       }
     }
-      $WHERE .= "AND R.ZoneCode IN (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent]  WHERE (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')  )";
+      $WHERE .= "AND R.ZoneCode IN (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_ALL]  WHERE StatusType = 'ib' AND  (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')  )";
   }else {
     if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6)) {
-      $_REQUEST['EmpID'] = "A00098";
+      $_REQUEST['EmpID'] = "A39768";
     }else {
       $_REQUEST['EmpID'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
     }
-      $WHERE .= "AND R.ZoneCode IN (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent]  WHERE (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')  )";
+      $WHERE .= "AND R.ZoneCode IN (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[EmployeeDataParent_ALL]  WHERE StatusType = 'ib' AND  (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')  )";
   }
 }
+
   $conn = connectDB_BigHead();
  ?>
   <!-- Content Wrapper. Contains page content -->
@@ -75,10 +60,10 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="row">
-        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportsale8">
+        <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportib1">
         <div class="col-md-2">
           <h4>
-            เก็บงวดแรก(ยกเลิก)
+            เก็บเงินงวดแรก
           </h4>
         </div>
         <div class="col-md-2">
@@ -88,7 +73,7 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
               if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6)) {
                 $level = 6 ;
               }else {
-                $sql_case = "SELECT TOP 1 PositionLevel FROM [Bighead_Mobile].[dbo].[Position] WHERE PositionID in (SELECT PositionCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE (EmployeeCode = 'A".substr($_COOKIE['tsr_emp_id'],1,5)."')) AND SourceSystem = 'Sale' ORDER BY PositionLevel DESC";
+                $sql_case = "SELECT TOP 1 PositionLevel FROM [Bighead_Mobile].[dbo].[Position] WHERE PositionID in (SELECT PositionCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE (EmployeeCode = 'A".substr($_COOKIE['tsr_emp_id'],1,5)."') AND ProcessType = 'ib') ORDER BY PositionLevel DESC";
 
                 //echo $sql_case;
                 $stmt = sqlsrv_query($conn,$sql_case);
@@ -104,7 +89,7 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
               <select class="form-control select2 group-sm" name="LvEmp" id = "LvEmp">
                 <option value="7">ทั้งหมด</option>
                 <option value="6">สาย</option>
-                <option value="5">ซุป</option>
+                <option value="5">ชุป</option>
                 <option value="4">ทีม</option>
                 <option value="3">หน่วย</option>
                 <option value="2">พนักงาน</option>
@@ -115,7 +100,7 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
               ?>
               <select class="form-control select2 group-sm" name="LvEmp" id = "LvEmp">
                 <option value="7">ทั้งหมด</option>
-                <option value="5">ซุป</option>
+                <option value="5">ชุป</option>
                 <option value="4">ทีม</option>
                 <option value="3">หน่วย</option>
                 <option value="2">พนักงาน</option>
@@ -151,6 +136,8 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
               break;
               }
               ?>
+
+
           </div>
         </div>
         <div class="col-md-3" >
@@ -178,10 +165,20 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
         </div>
 
         <div class="col-md-1">
+
           <a href="http://app.thiensurat.co.th/lkh/rpt.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=12&rpt=8" target="_blank" class="btn btn-default"> <i class="fa fa-print"></i> </a>
+
         </div>
         </form>
       </div>
+
+      <!--
+      <ol class="breadcrumb">
+        <li><a href="index.php?pages=info"><i class="fa fa-user"></i> รายงาน</a></li>
+        <li><i class="fa fa-user"></i> รายงาน(ฝ่ายเครดิต)</li>
+        <li class="active"> สรุปการเก็บเงินรายวัน </li>
+      </ol>
+    -->
 
     </section>
 
@@ -197,19 +194,17 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
            ?>
           <div class="box box-info">
             <div class="box-header with-border">
-              <P><center><B>รายงานสรุปการยกเลิกเก็บเงินงวดแรก</B></center></P>
+              <P><center><B>รายงานสรุปการเก็บเงินงวดแรก</B></center></P>
               <table width="100%">
                 <tr>
-                  <td>พนักงานขาย : <?=$EmpID['0']?> , <?=$EmpID['2']?></td>
-                  <td><?=$EmpID['1']?></td>
                   <td>ประจำวันที่ : <?=$searchDate?></td>
                   <td>พิมพ์โดย : <?=$_COOKIE['tsr_emp_name']?></td>
                 </tr>
               </table>
             </div>
             <?php
-            $httpExcelHead = "<P><center><B>รายงานสรุปการยกเลิกเก็บเงินงวดแรก</B></center></P>
-          <P><center><B> พนักงานเก็บเงิน : ".$EmpID['0']." , ".$EmpID['2']." ประจำวันที่ : ".$searchDate." พิมพ์โดย : ".$_COOKIE['tsr_emp_name']."</B></center></P>";
+            $httpExcelHead = "<P><center><B>รายงานสรุปการเก็บเงิน</B></center></P>
+          <P><center><B> ประจำวันที่ : ".$searchDate." พิมพ์โดย : ".$_COOKIE['tsr_emp_name']."</B></center></P>";
 
              ?>
 
@@ -270,30 +265,26 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
               ,Paydate
               ,PrintName
               ,SaleCode
-              , 'รายงานสรุปการยกเลิกเก็บเงินงวดแรก' AS printHead
+              , 'รายงานสรุปการเก็บเงินงวดแรก' AS printHead
               ,NetAmount
               ,ISNULL((SELECT MAX(PrintOrder) FROM Bighead_Mobile.dbo.DocumentHistory WHERE DocumentNumber = result.ReceiptID GROUP BY DocumentNumber) ,0) AS PrintOrder
               ,ISNULL(BookNo,'-') AS BookNo
               ,ISNULL(ReceiptNo,'-') AS ReceiptNo
-              from (SELECT DISTINCT R.ReceiptCode
-                ,R.ReceiptID,B.BookNo,B.ReceiptNo
+              from (SELECT DISTINCT ReceiptCode
+              ,R.ReceiptID,B.BookNo,B.ReceiptNo
               ,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate
-              ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.CONTNO AS CONTNO,C.ContractReferenceNo AS RefNo,CustomerName,RV.TotalPayment AS PAYAMT
+              ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.CONTNO AS CONTNO,C.ContractReferenceNo AS RefNo,CustomerName,Sy.Amount AS PAYAMT
               , Em.FirstName + ' ' + Em.LastName AS Names , '".$searchDate."' AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName,R.CreateBy as EmpID,R.ZoneCode as SaleCode ,S.NetAmount";
 
 
-              $sql_body = " FROM TSRData_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) INNER JOIN Bighead_Mobile.dbo.ReceiptVoid AS Rv WITH(NOLOCK) ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C WITH(NOLOCK) ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC WITH(NOLOCK) ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy WITH(NOLOCK) ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S WITH(NOLOCK) ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em WITH(NOLOCK) ON R.LastUpdateBy = EM.EmpID LEFT JOIN Bighead_Mobile.dbo.MigrateReportDailyReceiptB AS B ON B.InvNo = R.ReceiptCode  WHERE $WHERE AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0 AND R.TypeCode = 1
+              $sql_body = " FROM TSRData_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) LEFT JOIN Bighead_Mobile.dbo.Contract AS C WITH(NOLOCK) ON R.RefNo = C.RefNo LEFT JOIN [TSRData_Source].[dbo].[vw_DebtorCustomer] AS GC WITH(NOLOCK) ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy WITH(NOLOCK) ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S WITH(NOLOCK) ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em WITH(NOLOCK) ON R.LastUpdateBy = EM.EmpID LEFT JOIN Bighead_Mobile.dbo.MigrateReportDailyReceiptB AS B ON B.InvNo = R.ReceiptCode WHERE $WHERE AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND R.TypeCode = 1
               ) as result GROUP BY ReceiptCode,PaymentDueDate,CONTNO,CustomerName,EmpID,SaleCode,Names,Paydate,PrintName,RefNo,NetAmount,ReceiptID,BookNo,ReceiptNo ORDER BY ReceiptCode";
 
               $sql_case = $sql_select." ".$sql_body;
 
-              $sql_print = $sql_select." ".$sql_body;
+              $sql_print = $sql_case;
 
               //echo $sql_case;
-
-              $file = fopen("../tsr_SaleReport/pages/sqlText.txt","w");
-              fwrite($file,$sql_case);
-              fclose($file);
 
               $conns = connectDB_TSR();
               // เพิ่มลงฐานข้อมูล
@@ -308,7 +299,7 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
       				if( $stmt_insert === false ) {
       					 die( print_r( sqlsrv_errors(), true));
       				}
-
+              sqlsrv_close($conns);
               // เพิ่มลงฐานข้อมูล
               $num_row = checkNumRow($conn,$sql_case);
               $SumTotal = 0 ;
@@ -337,18 +328,55 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
               ?>
 
               <tr>
-                    <td style="text-align: center"><a class="text-danger"><?=$i?></a></td>
-                    <td><a class="text-danger"><?=$row['ReceiptCode']?></a></td>
-                    <td style="text-align: center"><a class="text-danger"><?=DateTimeThai($row['PaymentDueDate'])?> น.</a></td>
-                    <td style="text-align: center"><a class="text-danger"><?=$row['PaymentPeriodNumber']?></a></td>
-                    <td style="text-align: center"><a class="text-danger"><?=$row['RefNo']?></a></td>
-                    <td style="text-align: center"><a class="text-danger"><?=$row['CONTNO']?></a></td>
-                    <td><a class="text-danger"><?=$row['CustomerName']?></a></td>
-                    <td style="text-align: right"><a class="text-danger"><?=number_format($row['PAYAMT'],2)?></a></td>
-                    <td style="text-align: right"><a class="text-danger"><?=number_format($row['NetAmount'],2)?></a></td>
+
+                <?php
+                if ($row['PAYAMT'] == '0') {
+                  ?>
+                  <td style="text-align: center"><a class="text-danger"><?=$i?></a></td>
+                  <td><a class="text-danger"><?=$row['ReceiptCode']?></a></td>
+                  <td style="text-align: center"><a class="text-danger"><?=DateTimeThai($row['PaymentDueDate'])?> น.</a></td>
+                  <td style="text-align: center"><a class="text-danger"><?=$row['PaymentPeriodNumber']?></a></td>
+                  <td style="text-align: center"><a class="text-danger"><?=$row['RefNo']?></a></td>
+                  <td style="text-align: center"><a class="text-danger"><?=$row['CONTNO']?></a></td>
+                  <td><a class="text-danger"><?=$row['CustomerName']?></a></td>
+                  <td style="text-align: right"><a class="text-danger"><?=number_format($row['PAYAMT'],2)?></a></td>
+                  <td style="text-align: right"><a class="text-danger"><?=number_format($row['NetAmount'],2)?></a></td>
+                  <td style="text-align: center"><a class="text-danger"><?=$row['BookNo']?></a></td>
+                  <td style="text-align: center"><a class="text-danger"><?=$row['ReceiptNo']?></a></td>
+                  <td style="text-align: center"><a class="text-danger"><?=$row['PrintOrder']?></a></td>
+                  <?PHP
+                }elseif ($row['NetAmount'] != $row['PAYAMT']) {
+                    ?>
+                    <td style="text-align: center"><a class="text-warning"><?=$i?></a></td>
+                    <td><a class="text-warning"><?=$row['ReceiptCode']?></a></td>
+                    <td style="text-align: center"><a class="text-warning"><?=DateTimeThai($row['PaymentDueDate'])?> น.</a></td>
+                    <td style="text-align: center"><a class="text-warning"><?=$row['PaymentPeriodNumber']?></a></td>
+                    <td style="text-align: center"><a class="text-warning"><?=$row['RefNo']?></a></td>
+                    <td style="text-align: center"><a class="text-warning"><?=$row['CONTNO']?></a></td>
+                    <td><a class="text-warning"><?=$row['CustomerName']?></a></td>
+                    <td style="text-align: right"><a class="text-warning"><?=number_format($row['PAYAMT'],2)?></a></td>
+                    <td style="text-align: right"><a class="text-warning"><?=number_format($row['NetAmount'],2)?></a></td>
+                    <td style="text-align: center"><a class="text-warning"><?=$row['BookNo']?></a></td>
+                    <td style="text-align: center"><a class="text-warning"><?=$row['ReceiptNo']?></a></td>
+                    <td style="text-align: center"><a class="text-warning"><?=$row['PrintOrder']?></a></td>
+                    <?PHP
+                  }else {
+                    ?>
+                    <td style="text-align: center"><?=$i?></td>
+                    <td><?=$row['ReceiptCode']?></td>
+                    <td style="text-align: center"><?=DateTimeThai($row['PaymentDueDate'])?> น.</td>
+                    <td style="text-align: center"><?=$row['PaymentPeriodNumber']?></td>
+                    <td style="text-align: center"><?=$row['RefNo']?></td>
+                    <td style="text-align: center"><?=$row['CONTNO']?></td>
+                    <td><?=$row['CustomerName']?></td>
+                    <td style="text-align: right"><?=number_format($row['PAYAMT'],2)?></td>
+                    <td style="text-align: right"><?=number_format($row['NetAmount'],2)?></td>
                     <td style="text-align: center"><?=$row['BookNo']?></td>
                     <td style="text-align: center"><?=$row['ReceiptNo']?></td>
                     <td style="text-align: center"><?=$row['PrintOrder']?></td>
+                    <?PHP
+                  }
+                 ?>
               </tr>
 
               <?php
@@ -400,7 +428,6 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
         <?php
           }
           sqlsrv_close($conn);
-          sqlsrv_close($conns);
         ?>
         </div>
 
@@ -428,7 +455,6 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
     });
   </script>
   <script>
-
       $(function(){
 
         //แสดงข้อมูล อำเภอ  โดยใช้คำสั่ง change จะทำงานกรณีมีการเปลี่ยนแปลงที่ #province
@@ -436,7 +462,7 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
           //กำหนดให้ ตัวแปร province มีค่าเท่ากับ ค่าของ #province ที่กำลังถูกเลือกในขณะนั้น
           var LvEmp = $(this).val();
           $.ajax({
-            url:"pages/getdata_type_search.php",//url:"get_data.php",
+            url:"pages/getdata_type_search_ib.php",//url:"get_data.php",
             dataType: "json",//กำหนดให้มีรูปแบบเป็น Json
             data:{LvEmp:LvEmp},//ส่งค่าตัวแปร province_id เพื่อดึงข้อมูล อำเภอ ที่มี province_id เท่ากับค่าที่ส่งไป
             success:function(data){

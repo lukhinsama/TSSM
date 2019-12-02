@@ -19,21 +19,21 @@ if (empty($_REQUEST['yearPark'])) {
 
 if (empty($_REQUEST['searchDate'])) {
   $searchDate = DateThai(date('Y-m-d'));
-  $WHERE = " datediff(DAY,A.paydate,GETDATE())=0 ";
+  $WHERE = " datediff(DAY,R.DatePayment,GETDATE())=0 ";
   $top = "TOP 10";
 }else {
   $searchDate = DateThai(DateEng($_REQUEST['searchDate']));
-  $WHERE = " AND A.paydate BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59'";
+  $WHERE = " AND R.DatePayment BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59'";
   $top = "";
 }
 
 if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
   $searchDate = DateThai(date('Y-m-d'));
-  $WHERE = " datediff(DAY,A.paydate,GETDATE())=0 ";
+  $WHERE = " datediff(DAY,R.DatePayment,GETDATE())=0 ";
   $top = "TOP 10";
 }else {
   $searchDate = DateThai(DateEng($_REQUEST['startDate']))." - ".DateThai(DateEng($_REQUEST['endDate']));
-  $WHERE = " AND A.paydate BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
+  $WHERE = " AND R.DatePayment BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
   $top = "";
 }
 
@@ -292,23 +292,26 @@ if (!empty($_REQUEST['sortcontno'])) {
               $sql_select = "SELECT DISTINCT
               R.ReceiptCode
               ,R.TotalPayment
-              ,A.BookNo
-              ,A.ReceiptNo
+              ,A.ManualVolumeNo AS BookNo
+              ,A.ManualRunningNo AS ReceiptNo
               ,P.CashCode
-              ,A.CashName
+              ,E.FirstName+' '+E.LastName AS CashName
               ,C.ContNo
-              ,A.Name AS CustName
-              ,A.PayPeriod AS PaymentPeriodNumber
-              ,A.paydate
-              ,CONVERT(varchar(20),A.paydate,105) +' '+ CONVERT(varchar(5),A.paydate,108) as PaymentDueDate
-              ,A.Premium , A.PayAmt AS Amount,A.InvNo ,A.discfirst
+              ,DC.CustomerName AS CustName
+              ,SP.PaymentPeriodNumber
+              ,R.DatePayment AS paydate
+              ,CONVERT(varchar(20),SP.PaymentDueDate,105) +' '+ CONVERT(varchar(5),SP.PaymentDueDate,108) as PaymentDueDate
+              ,SP.PaymentAmount AS Premium , SP.NetAmount AS Amount,R.ReceiptCode AS InvNo ,SP.Discount AS discfirst
               ,ISNULL((SELECT MAX(PrintOrder) FROM Bighead_Mobile.dbo.DocumentHistory WHERE DocumentNumber = R.ReceiptID GROUP BY DocumentNumber) ,0) AS PrintOrder
-              from Bighead_Mobile.dbo.MigrateReportDailyReceiptB AS A
-              INNER JOIN Bighead_Mobile.dbo.SalePaymentPeriodPayment AS S ON A.SalePaymentPeriodID = S.SalePaymentPeriodID
-              INNER JOIN Bighead_Mobile.dbo.Receipt AS R ON R.ReceiptID = s.ReceiptID
+              from Bighead_Mobile.dbo.ManualDocument AS A
+              INNER JOIN Bighead_Mobile.dbo.Receipt AS R ON R.ReceiptID = A.DocumentNumber
+              INNER JOIN Bighead_Mobile.dbo.SalePaymentPeriodPayment AS S ON R.ReceiptID = S.ReceiptID
+			  INNER JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS Sp ON Sp.SalePaymentPeriodID = S.SalePaymentPeriodID
+              INNER JOIN Bighead_Mobile.dbo.Employee AS E ON E.EmpID = R.CreateBy
               INNER JOIN Bighead_Mobile.dbo.payment AS P on S.paymentId = p.paymentId
               INNER JOIN Bighead_Mobile.dbo.contract AS C ON R.RefNo = C.RefNo
-              where (A.BookNo IS NOT NULL OR A.ReceiptNo IS NOT NULL) $WHERE";
+			  INNER JOIN TSRData_Source.dbo.vw_DebtorCustomer AS DC ON DC.CustomerID = C.CustomerID
+        WHERE SP.PaymentPeriodNumber = 1 $WHERE";
 
               $sql_case = "SELECT * FROM (".$sql_select.") AS ABC $WHERE2 ";
 

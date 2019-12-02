@@ -229,6 +229,7 @@ if (!empty($_REQUEST['sortcontno'])) {
                 <th style=\"text-align: center\">เลขที่ใบเสร็จ</th>
                 <th style=\"text-align: center\">เวลาออกใบเสร็จ</th>
                 <th style=\"text-align: center\">งวดที่</th>
+                <th style=\"text-align: center\">เลขที่อ้างอิง</th>
                 <th style=\"text-align: center\">เลขที่สัญญา</th>
                 <th style=\"text-align: center\">ชื่อ - สกุล</th>
                 <th style=\"text-align: center\">จำนวนเงิน</th>
@@ -245,6 +246,7 @@ if (!empty($_REQUEST['sortcontno'])) {
               ,CONVERT(varchar,PaymentDueDate) as PaymentDueDate
               ,case when count(ReceiptCode) = 1 then convert(varchar,min(PaymentPeriodNumber)) else convert(varchar,min(PaymentPeriodNumber)) + ' - ' + convert(varchar,Max(PaymentPeriodNumber)) end as PaymentPeriodNumber
               ,CONTNO
+              ,ContractReferenceNo
               ,CustomerName
               ,case when count(ReceiptCode) = 1 then SUM(PAYAMT) else SUM(PAYAMT) end as PAYAMT
               ,case when count(ReceiptCode) = 1 then SUM(PAYAMT) else SUM(PAYAMT) end as PAYAMTS
@@ -256,11 +258,11 @@ if (!empty($_REQUEST['sortcontno'])) {
               , 'รายงานสรุปการเก็บเงิน (บางส่วน)' AS printHead
               from (SELECT ReceiptCode
               ,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate
-              ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,Sy.Amount AS PAYAMT
+              ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.ContractReferenceNo,c.CONTNO AS CONTNO,CustomerName,Sy.Amount AS PAYAMT
               ,ISNULL ((select SendAmount from [Bighead_Mobile].[dbo].SendMoney  WHERE SaveTransactionNoDate is not null  AND CreateBy = em.EmpID AND SaveTransactionNoDate BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59' ),0) as Sendmoney, Ed.FirstName + ' ' + Ed.LastName AS Names , '".$searchDate."' AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName ,Em.EmpID,case when ed.SaleCode is null then '-' else ed.SaleCode end as SaleCode";
 
-              $sql_body = " FROM Bighead_Mobile.dbo.vw_ReceiptWithZone AS R LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.LastUpdateBy = EM.EmpID LEFT JOIN TsrData_source.dbo.CArea AS Ca ON R.LastUpdateBy = Ca.EmpID LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' WHERE $WHERE AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND CA.ACode = convert(int,RIGHT(Ed.SaleCode,3)) AND Sy.Amount > 0 AND S.PaymentComplete = 0
-              ) as result GROUP BY ReceiptCode,PaymentDueDate,CONTNO,CustomerName,EmpID,SaleCode,Names,Paydate,PrintName ORDER BY ReceiptCode";
+              $sql_body = " FROM TSRData_Source.dbo.vw_ReceiptWithZone AS R LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.LastUpdateBy = EM.EmpID LEFT JOIN TsrData_source.dbo.CArea AS Ca ON R.LastUpdateBy = Ca.EmpID LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.processtype = 'DEPT' WHERE $WHERE AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND CA.ACode = convert(int,RIGHT(Ed.SaleCode,3)) AND Sy.Amount > 0 AND S.PaymentComplete = 0
+              ) as result GROUP BY ReceiptCode,PaymentDueDate,CONTNO,ContractReferenceNo,CustomerName,EmpID,SaleCode,Names,Paydate,PrintName ORDER BY ReceiptCode";
 
               /*
               $sql_print = "SELECT ReceiptCode
@@ -327,6 +329,7 @@ if (!empty($_REQUEST['sortcontno'])) {
                   <td>'".$row['ReceiptCode']."</td>
                   <td style=\"text-align: center\">".DateTimeThai($row['PaymentDueDate'])." น.</td>
                   <td style=\"text-align: center\">".$row['PaymentPeriodNumber']."</td>
+                  <td style=\"text-align: center\">".$row['ContractReferenceNo']."</td>
                   <td style=\"text-align: center\">".$row['CONTNO']."</td>
                   <td>".$row['CustomerName']."</td>
                   <td style=\"text-align: right\">".number_format($row['PAYAMT'],2)."</td>

@@ -140,7 +140,7 @@ if (!empty($_REQUEST['TeamCode']) ) {
           </form>
         </div>
         <div class="col-md-2">
-          <a href="http://app.thiensurat.co.th/lkh/rpt_lk2.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=2" target="_blank" class="btn btn-default">
+          <a href="http://app.thiensurat.co.th/lkh/rpt.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=2&rpt=2" target="_blank" class="btn btn-default">
             <i class="fa fa-print"></i> </a>
         </div>
       </div>

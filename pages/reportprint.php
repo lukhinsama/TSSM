@@ -7,9 +7,9 @@ $limit_start = (($page - 1) * $limit_per_page) + 1;
 $limit_end = ($page) * $limit_per_page;
 
 if (empty($_REQUEST['searchDate'])) {
-  $searchDate = DateThai(date('Y-m-d'));
-  $WHERE = " datediff(DAY,R.DatePayment,GETDATE())=0 ";
-  $top = "TOP 10";
+  //$searchDate = DateThai(date('Y-m-d'));
+  //$WHERE = " datediff(DAY,R.DatePayment,GETDATE())=0 ";
+  //$top = "TOP 10";
 }else {
   $searchDate = DateThai(DateEng($_REQUEST['searchDate']));
   $WHERE = "AND R.DatePayment BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59'";
@@ -18,8 +18,8 @@ if (empty($_REQUEST['searchDate'])) {
 
 if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
   $searchDate = DateThai(date('Y-m-d'));
-  $WHERE = " datediff(DAY,R.DatePayment,GETDATE())=0 ";
-  $top = "TOP 10";
+  //$WHERE = " datediff(DAY,R.DatePayment,GETDATE())=0 ";
+  //$top = "TOP 10";
 }else {
   $searchDate = DateThai(DateEng($_REQUEST['startDate']))." - ".DateThai(DateEng($_REQUEST['endDate']));
   $WHERE = "AND R.DatePayment BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
@@ -70,7 +70,7 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
           if (($_COOKIE['tsr_emp_permit'] != 4)) {
            ?>
           <div class="form-group group-sm">
-            <input type="text" class="form-control" name="searchText" id="searchText" placeholder="เลขที่สัญญา / เลขที่ใบเสร็จ" >
+            <input type="text" class="form-control" name="searchText" id="searchText" required placeholder="เลขที่สัญญา / เลขที่ใบเสร็จ" >
           </div>
           <?php
         }
@@ -84,9 +84,9 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
             <!--<input type="text" class="form-control" name="searchDate" autocomplete="off" id="datepicker2"  placeholder="กรอกวันที่ .." required>-->
 
             <div class="input-group input-group input-daterange" id="datepicker2">
-                    <input type="text" class="form-control" name="startDate" autocomplete="off" value="<?php if(isset($_REQUEST['startDate'])) {echo $_REQUEST['startDate'];}?>" placeholder="วันเริ่มต้น .." required>
+                    <input type="text" class="form-control" name="startDate" autocomplete="off" value="<?php if(isset($_REQUEST['startDate'])) {echo $_REQUEST['startDate'];}?>" placeholder="วันเริ่มต้น .." >
                     <span class="input-group-addon">ถึง</span>
-                    <input type="text" class="form-control" name="endDate" autocomplete="off" value="<?php if(isset($_REQUEST['endDate'])) {echo $_REQUEST['endDate'];}?>" placeholder="วันสิ้นสุด .." required>
+                    <input type="text" class="form-control" name="endDate" autocomplete="off" value="<?php if(isset($_REQUEST['endDate'])) {echo $_REQUEST['endDate'];}?>" placeholder="วันสิ้นสุด .." >
                 </div>
 
             <div class="input-group-btn">
@@ -110,7 +110,8 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
 
         <div class="col-xs-12">
           <?php
-            if (!empty($_REQUEST['searchDate']) || ((!empty($_REQUEST['startDate']) && !empty($_REQUEST['endDate'])))) {
+          //  if (!empty($_REQUEST['searchText']) || ((!empty($_REQUEST['startDate']) && !empty($_REQUEST['endDate'])))) {
+            if (!empty($_REQUEST['searchText'])) {
 
            ?>
           <div class="box box-info">

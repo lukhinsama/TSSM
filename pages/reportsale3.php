@@ -42,61 +42,32 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
     $EmpID['0'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
     $EmpID['1'] = $_COOKIE['tsr_emp_name'];
 
-  //  $connss = connectDB_BigHead();
-    //$sql_Empid = "SELECT SaleCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE EmployeeCode = '".$EmpID['0']."'";
-    $WHERE .= "AND R.ZoneCode in (SELECT SaleCode FROM Bighead_Mobile.dbo.EmployeeDetail AS Ed WHERE ed.salecode is not null AND ed.TeamCode IN (
-      SELECT DISTINCT TeamCode  FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent] WHERE EmployeeCodeLV2 = '".$EmpID['0']."' OR EmployeeCodeLV3 = '".$EmpID['0']."'   OR EmployeeCodeLV4 = '".$EmpID['0']."' OR EmployeeCodeLV5 = '".$EmpID['0']."' OR EmployeeCodeLV6 = '".$EmpID['0']."' OR ParentEmployeeCode = '".$EmpID['0']."'))
+    $WHERE .= "AND R.ZoneCode IN (
+      SELECT DISTINCT C.salecode  FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent] WHERE (EmployeeCodeLV2 = '".$EmpID['0']."' OR EmployeeCodeLV3 = '".$EmpID['0']."'   OR EmployeeCodeLV4 = '".$EmpID['0']."' OR EmployeeCodeLV5 = '".$EmpID['0']."' OR EmployeeCodeLV6 = '".$EmpID['0']."' OR ParentEmployeeCode = '".$EmpID['0']."')  )
  ";
 
 
-    //echo $sql_Empid;
-    /*
-    $stmt = sqlsrv_query($connss,$sql_Empid);
-    while ($rowss = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
-      $EmpID['2'] = $rowss['SaleCode'];
+  }
+}else {
+  if (!empty($_REQUEST['EmpID'])) {
+
+    if ($_REQUEST['EmpID'] == "7") {
+      if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6)) {
+        $_REQUEST['EmpID'] = "A00098";
+      }else {
+        $_REQUEST['EmpID'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
+      }
     }
-    */
-    //sqlsrv_close($connss);
-
-    //$WHERE .= " AND R.ZoneCode = '".$EmpID['2']."'";
-
-
-  }
-}else {
-  if (empty($_REQUEST['EmpID'])) {
-    $EmpID = array('0','-');
+      $WHERE .= "AND R.ZoneCode IN (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent]  WHERE (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')  )";
   }else {
-    $EmpID = explode("_",$_REQUEST['EmpID']);
-    $WHERE .= " AND R.ZoneCode = '".$EmpID['2']."'";
+    if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6)) {
+      $_REQUEST['EmpID'] = "A00098";
+    }else {
+      $_REQUEST['EmpID'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
+    }
+      $WHERE .= "AND R.ZoneCode IN (SELECT DISTINCT SaleCode FROM [TSRData_Source].[dbo].[vw_EmployeeDataParent]  WHERE (EmployeeCodeLV2 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV3 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV4 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV5 = '".$_REQUEST['EmpID']."' OR EmployeeCodeLV6 = '".$_REQUEST['EmpID']."' OR ParentEmployeeCode = '".$_REQUEST['EmpID']."')  )";
   }
 }
-/*
-if (!empty($_REQUEST['sortcontno'])) {
-  if ($_REQUEST['sortcontno'] == "ASC") {
-    $sort = "ORDER BY CONTNO";
-    $sortcontno = "DESC";
-    $sortreceipt = "DESC";
-  }else {
-    $sort = "ORDER BY CONTNO DESC";
-    $sortcontno = "ASC";
-    $sortreceipt = "DESC";
-  }
-}elseif(!empty($_REQUEST['sortreceipt'])) {
-  if ($_REQUEST['sortreceipt'] == "ASC") {
-    $sort = "ORDER BY ReceiptCode";
-    $sortreceipt = "DESC";
-    $sortcontno = "ASC";
-  }else {
-    $sort = "ORDER BY ReceiptCode DESC";
-    $sortreceipt = "ASC";
-    $sortcontno = "ASC";
-  }
-}else {
-  $sort = "ORDER BY ReceiptCode,PaymentPeriodNumber";
-  $sortcontno = "ASC";
-  $sortreceipt = "DESC";
-}
-*/
   $conn = connectDB_BigHead();
  ?>
   <!-- Content Wrapper. Contains page content -->
@@ -105,38 +76,89 @@ if (!empty($_REQUEST['sortcontno'])) {
     <section class="content-header">
       <div class="row">
         <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportsale3">
-        <div class="col-md-3">
+        <div class="col-md-2">
           <h4>
             เก็บงวดแรก(เต็มงวด)
           </h4>
         </div>
-        <div class="col-md-4">
-          <?php
-          if (($_COOKIE['tsr_emp_permit'] != 4)) {
-           ?>
+        <div class="col-md-2">
           <div class="form-group group-sm">
-            <select class="form-control select2 group-sm" name="EmpID" >
-              <optgroup label="พนักงานเก็บเงิน">
 
-                  <option value="0"> ทั้งหมด </option>
-                  <?php
-
-                $sql_case = "SELECT SaleCode as mcode,TeamCode,EmployeeName AS Name ,EmployeeCode AS EmpID,case when SaleCode is null then '-' else SaleCode end as SaleCode ,SupervisorCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE  salecode is not null AND SupervisorCode is not null AND ProcessType = 'sale' AND TeamCode is not null ORDER BY TeamCode";
+              <?PHP
+              if (($_COOKIE['tsr_emp_permit'] == 1) || ($_COOKIE['tsr_emp_permit'] == 2) || ($_COOKIE['tsr_emp_permit'] == 6)) {
+                $level = 6 ;
+              }else {
+                $sql_case = "SELECT TOP 1 PositionLevel FROM [Bighead_Mobile].[dbo].[Position] WHERE PositionID in (SELECT PositionCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE (EmployeeCode = 'A".substr($_COOKIE['tsr_emp_id'],1,5)."')) AND SourceSystem = 'Sale' ORDER BY PositionLevel DESC";
 
                 //echo $sql_case;
                 $stmt = sqlsrv_query($conn,$sql_case);
                 while ($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
-                ?>
-              <option value="<?=$row['EmpID']?>_<?=$row['Name']?>_<?=$row['SaleCode']?>_<?=$row['mcode']?>"><?=$row['EmpID']?> (<?=$row['TeamCode']?>) <?=$row['Name']?> </option>
-                <?php
+                  $level = $row['PositionLevel'];
                   }
-                ?>
-              </optgroup>
-            </select>
+              }
+
+
+              switch ($level) {
+              case "6":
+              ?>
+              <select class="form-control select2 group-sm" name="LvEmp" id = "LvEmp">
+                <option value="7">ทั้งหมด</option>
+                <option value="6">สาย</option>
+                <option value="5">ซุป</option>
+                <option value="4">ทีม</option>
+                <option value="3">หน่วย</option>
+                <option value="2">พนักงาน</option>
+              </select>
+              <?php
+              break;
+              case "5":
+              ?>
+              <select class="form-control select2 group-sm" name="LvEmp" id = "LvEmp">
+                <option value="7">ทั้งหมด</option>
+                <option value="5">ซุป</option>
+                <option value="4">ทีม</option>
+                <option value="3">หน่วย</option>
+                <option value="2">พนักงาน</option>
+              </select>
+              <?php
+              break;
+              case "4":
+              ?>
+              <select class="form-control select2 group-sm" name="LvEmp" id = "LvEmp">
+                <option value="7">ทั้งหมด</option>
+                <option value="4">ทีม</option>
+                <option value="3">หน่วย</option>
+                <option value="2">พนักงาน</option>
+              </select>
+              <?php
+              break;
+              case "3":
+              ?>
+              <select class="form-control select2 group-sm" name="LvEmp" id = "LvEmp">
+                <option value="7">ทั้งหมด</option>
+                <option value="3">หน่วย</option>
+                <option value="2">พนักงาน</option>
+              </select>
+              <?php
+              break;
+              case "2":
+              ?>
+              <select class="form-control select2 group-sm" name="LvEmp" id = "LvEmp">
+                <option value="7">ทั้งหมด</option>
+                <option value="2">พนักงาน</option>
+              </select>
+              <?php
+              break;
+              }
+              ?>
+
+
           </div>
-          <?php
-        }
-           ?>
+        </div>
+        <div class="col-md-3" >
+          <select class="form-control select2 group-sm" id="EmpID"  name="EmpID">
+            <option id="Emp_list" value="7">ทั้งหมด</option>
+          </select>
         </div>
         <div class="col-md-4">
           <div class="input-group input-group">
@@ -158,7 +180,7 @@ if (!empty($_REQUEST['sortcontno'])) {
         </div>
 
         <div class="col-md-1">
-          <a href="http://app.thiensurat.co.th/lkh/rpt_lk1.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=1" target="_blank" class="btn btn-default"> <i class="fa fa-print"></i> </a>
+          <a href="http://app.thiensurat.co.th/lkh/rpt.aspx?id=<?=$_COOKIE['tsr_emp_id']?>&type=12&rpt=8" target="_blank" class="btn btn-default"> <i class="fa fa-print"></i> </a>
         </div>
         </form>
       </div>
@@ -201,8 +223,8 @@ if (!empty($_REQUEST['sortcontno'])) {
 
              ?>
 
-          <!--<div class="box-body table-responsive no-padding">-->
-          <div class="box-body">
+          <div class="box-body table-responsive no-padding">
+          <!--<div class="box-body">-->
 
             <table id="example2" class="table table-hover table-striped">
               <thead>
@@ -215,6 +237,10 @@ if (!empty($_REQUEST['sortcontno'])) {
                 <th style="text-align: center">เลขที่สัญญา</th>
                 <th style="text-align: center">ชื่อ - สกุล</th>
                 <th style="text-align: center">จำนวนเงิน</th>
+                <th style="text-align: center">งวดแรก</th>
+                <th style="text-align: center">เล่มใบเสร็จมือ</th>
+                <th style="text-align: center">เลขใบเสร็จมือ</th>
+                <th style="text-align: center">จำนวนพิมพ์</th>
               </tr>
             </thead>
             <tbody>
@@ -233,6 +259,10 @@ if (!empty($_REQUEST['sortcontno'])) {
                 <th style=\"text-align: center\">เลขที่สัญญา</th>
                 <th style=\"text-align: center\">ชื่อ - สกุล</th>
                 <th style=\"text-align: center\">จำนวนเงิน</th>
+                <th style=\"text-align: center\">งวดแรก</th>
+                <th style=\"text-align: center\">เล่มใบเสร็จมือ</th>
+                <th style=\"text-align: center\">เลขใบเสร็จมือ</th>
+                <th style=\"text-align: center\">จำนวนพิมพ์</th>
               </tr>
             </thead>
             <tbody>";
@@ -272,15 +302,20 @@ if (!empty($_REQUEST['sortcontno'])) {
               ,Paydate
               ,PrintName
               ,SaleCode
-              , 'รายงานสรุปการเก็บเงิน' AS printHead
+              , 'รายงานสรุปการเก็บเงินงวดแรก(เต็มงวด)' AS printHead
+              ,NetAmount
+              ,ISNULL((SELECT MAX(PrintOrder) FROM Bighead_Mobile.dbo.DocumentHistory WHERE DocumentNumber = result.ReceiptID GROUP BY DocumentNumber) ,0) AS PrintOrder
+              ,ISNULL(BookNo,'-') AS BookNo
+              ,ISNULL(ReceiptNo,'-') AS ReceiptNo
               from (SELECT DISTINCT ReceiptCode
+                ,R.ReceiptID,B.BookNo,B.ReceiptNo
               ,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate
               ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.CONTNO AS CONTNO,C.ContractReferenceNo AS RefNo,CustomerName,Sy.Amount AS PAYAMT
-              , Em.FirstName + ' ' + Em.LastName AS Names , '".$searchDate."' AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName,R.CreateBy as EmpID,R.ZoneCode as SaleCode ";
+              , Em.FirstName + ' ' + Em.LastName AS Names , '".$searchDate."' AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName,R.CreateBy as EmpID,R.ZoneCode as SaleCode ,S.NetAmount";
 
 
-              $sql_body = " FROM TSRData_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) LEFT JOIN Bighead_Mobile.dbo.Contract AS C WITH(NOLOCK) ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC WITH(NOLOCK) ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy WITH(NOLOCK) ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S WITH(NOLOCK) ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em WITH(NOLOCK) ON R.LastUpdateBy = EM.EmpID WHERE $WHERE AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount > 0 AND R.TypeCode = 1 AND S.PaymentComplete = 1
-              ) as result GROUP BY ReceiptCode,PaymentDueDate,CONTNO,CustomerName,EmpID,SaleCode,Names,Paydate,PrintName,RefNo ORDER BY ReceiptCode";
+              $sql_body = " FROM TSRData_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) LEFT JOIN Bighead_Mobile.dbo.Contract AS C WITH(NOLOCK) ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC WITH(NOLOCK) ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy WITH(NOLOCK) ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S WITH(NOLOCK) ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em WITH(NOLOCK) ON R.LastUpdateBy = EM.EmpID LEFT JOIN Bighead_Mobile.dbo.MigrateReportDailyReceiptB AS B ON B.InvNo = R.ReceiptCode WHERE $WHERE AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount > 0 AND R.TypeCode = 1 AND S.PaymentComplete = 1
+              ) as result GROUP BY ReceiptCode,PaymentDueDate,CONTNO,CustomerName,EmpID,SaleCode,Names,Paydate,PrintName,RefNo,NetAmount,ReceiptID,BookNo,ReceiptNo  ORDER BY ReceiptCode";
 
 
               /*
@@ -319,7 +354,7 @@ if (!empty($_REQUEST['sortcontno'])) {
 
               $conns = connectDB_TSR();
               // เพิ่มลงฐานข้อมูล
-              $sql_insert = "INSERT INTO TSR_Application.dbo.TSS_ReportCredit_2_sys (Empid,[SQLtext],addtime,rpttype) VALUES (?,?,GETDATE(),1)";
+              $sql_insert = "INSERT INTO TSR_Application.dbo.TSS_ReportCredit_2_sys (Empid,[SQLtext],addtime,rpttype) VALUES (?,?,GETDATE(),12)";
       				//echo $sql_insert;
 
       				$params = array($_COOKIE['tsr_emp_id'],$sql_print);
@@ -351,6 +386,10 @@ if (!empty($_REQUEST['sortcontno'])) {
                   <td style=\"text-align: center\">".$row['CONTNO']."</td>
                   <td>".$row['CustomerName']."</td>
                   <td style=\"text-align: right\">".number_format($row['PAYAMT'],2)."</td>
+                  <td style=\"text-align: right\">".number_format($row['NetAmount'],2)."</td>
+                  <td style=\"text-align: center\">".$row['BookNo']."</td>
+                  <td style=\"text-align: center\">".$row['ReceiptNo']."</td>
+                  <td style=\"text-align: center\">".$row['PrintOrder']."</td>
                 </tr>";
               ?>
 
@@ -363,6 +402,10 @@ if (!empty($_REQUEST['sortcontno'])) {
                 <td style="text-align: center"><?=$row['CONTNO']?></td>
                 <td><?=$row['CustomerName']?></td>
                 <td style="text-align: right"><?=number_format($row['PAYAMT'],2)?></td>
+                <td style="text-align: right"><?=number_format($row['NetAmount'],2)?></td>
+                <td style="text-align: center"><?=$row['BookNo']?></td>
+                <td style="text-align: center"><?=$row['ReceiptNo']?></td>
+                <td style="text-align: center"><?=$row['PrintOrder']?></td>
               </tr>
 
               <?php
@@ -440,4 +483,29 @@ if (!empty($_REQUEST['sortcontno'])) {
         "autoWidth": false
       });
     });
+  </script>
+  <script>
+
+      $(function(){
+
+        //แสดงข้อมูล อำเภอ  โดยใช้คำสั่ง change จะทำงานกรณีมีการเปลี่ยนแปลงที่ #province
+        $("#LvEmp").change(function(){
+          //กำหนดให้ ตัวแปร province มีค่าเท่ากับ ค่าของ #province ที่กำลังถูกเลือกในขณะนั้น
+          var LvEmp = $(this).val();
+          $.ajax({
+            url:"pages/getdata_type_search.php",//url:"get_data.php",
+            dataType: "json",//กำหนดให้มีรูปแบบเป็น Json
+            data:{LvEmp:LvEmp},//ส่งค่าตัวแปร province_id เพื่อดึงข้อมูล อำเภอ ที่มี province_id เท่ากับค่าที่ส่งไป
+            success:function(data){
+              //กำหนดให้ข้อมูลใน #amphur เป็นค่าว่าง
+              $("#EmpID").text("");
+              //วนลูปแสดงข้อมูล ที่ได้จาก ตัวแปร data
+              $.each(data, function( index, value ) {
+                //แทรก Elements ข้อมูลที่ได้  ใน id amphur  ด้วยคำสั่ง append
+                  $("#EmpID").append("<option value='"+ value.id +"'> " + value.name + "</option>");
+              });
+            }
+          });
+        });
+      });
   </script>

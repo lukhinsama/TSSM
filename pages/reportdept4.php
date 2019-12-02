@@ -49,7 +49,23 @@ if (($_COOKIE['tsr_emp_permit'] == 4 )) {
   if (substr($_COOKIE['tsr_emp_id'],0,1) == "0") {
     $EmpID['0'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
     $EmpID['1'] = $_COOKIE['tsr_emp_name'];
-    $WHERE .= " AND Emd.EmployeeCode = '".$EmpID['0']."'";
+
+        $connss = connectDB_BigHead();
+
+        $SQl = "SELECT case when EmployeeCode = TeamHeadCode THEN TeamCode WHEN EmployeeCode = DepartmentHeadCode THEN Departmentcode ELSE EmployeeCode END AS valueText ,case when EmployeeCode = TeamHeadCode THEN 'TeamCode' WHEN EmployeeCode = DepartmentHeadCode THEN 'DepartmentCode' ELSE 'EmployeeCode' END AS statusText  FROM Bighead_Mobile.dbo.EmployeeDetail WHERE PositionCode = 'dept' AND EmployeeCode = '".$EmpID['0']."'";
+        //echo $SQl;
+        $stmt = sqlsrv_query($connss,$SQl);
+        while ($r = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
+          if ($r['statusText'] == 'TeamCode') {
+           $WHERE .= " AND Emd.TeamCode = '".$r['valueText']."'";
+         }elseif ($r['statusText'] == 'DepartmentCode') {
+           $WHERE .= " AND Emd.DepartmentCode = '".$r['valueText']."'";
+         }else {
+           $WHERE .= " AND Emd.EmployeeCode = '".$r['valueText']."'";
+         }
+        }
+        sqlsrv_close($connss);
+    //$WHERE .= " AND Emd.EmployeeCode = '".$EmpID['0']."'";
   }
 }
 
