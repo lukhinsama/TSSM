@@ -33,7 +33,7 @@ if (empty($_REQUEST['searchDate'])) {
   $dateSearch = "(".$d."/".$m."/".$y." - ".$d."/".$m."/".$y.")";
   //$WHERE = "AND P.DatePayment BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59'";
   //$WHERE = "cast(Receipt.DatePayment as date) BETWEEN cast('".DateEng($_REQUEST['startDate'])."' as date) AND cast('".DateEng($_REQUEST['startDate'])."' as date) ";
-  $WHERE = "Receipt.DatePayment BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['startDate'])." 23:59' AND SalePaymentPeriodPayment.CreateDate  BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['startDate'])." 23:59'";
+  $WHERE = "Receipt.DatePayment BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
 }
 
 if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
@@ -52,7 +52,7 @@ if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
   $dateSearch = "(".$d."/".$m."/".$y." - ".$d."/".$m."/".$y.")";
   //$WHERE = "AND P.DatePayment BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
   //$WHERE = "cast(Receipt.DatePayment as date) BETWEEN cast('".DateEng($_REQUEST['startDate'])."' as date) AND cast('".DateEng($_REQUEST['endDate'])."' as date) ";
-  $WHERE = "Receipt.DatePayment BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['startDate'])." 23:59' AND SalePaymentPeriodPayment.CreateDate  BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['startDate'])." 23:59'";
+  $WHERE = "Receipt.DatePayment BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59' AND SalePaymentPeriodPayment.CreateDate  BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59'";
 }
 
 //echo "TeamCode".$_REQUEST['TeamCode'];
@@ -95,11 +95,7 @@ if (!empty($_REQUEST['TeamCode']) ) {
                 }
 
                 $sql_case = "SELECT [SupervisorCode],
-                CASE [SupervisorCode]
-                WHEN '80101' THEN 'ทีม 1'
-                WHEN '80102' THEN 'ทีม 2'
-                ELSE 'ทีมอื่นๆ'
-                END AS TeamCode
+                [SupervisorCode] AS TeamCode
                 FROM [Bighead_Mobile].[dbo].[EmployeeDetail] AS Emd
                 LEFT JOIN [Bighead_Mobile].[dbo].[Employee] AS Em
                 ON Emd.EmployeeCode = Em.EmpID
@@ -184,43 +180,6 @@ if (!empty($_REQUEST['TeamCode']) ) {
                <?php
 
                $conn = connectDB_BigHead();
-               /*
-               $sql_case = "SELECT row_number() OVER (ORDER BY CCode ASC) AS rownum , CCode ,Name,sum(Ref) AS Ref,COUNT(RefNO) AS RefNO,SUM(PAYAMT) AS PAYAMT , '".$searchDate."' as printdate ,'".$teamcode[1]."' AS TeamCode
-               FROM (SELECT CCode,Name,COUNT(RefNO) AS Ref,SUM(PAYAMT) as PAYAMT ,RefNO FROM (SELECT emd.SaleCode As Ccode,emd.EmployeeName AS Name,pay.PAYAMT AS PAYAMT,P.DatePayment AS PayDate,P.RefNO
-               FROM [Bighead_Mobile].[dbo].[Receipt] AS P
-               LEFT JOIN [Bighead_Mobile].[dbo].[EmployeeDetail] AS Emd ON P.LastUpdateBy = Emd.EmployeeCode
-               LEFT JOIN [Bighead_Mobile].[dbo].[Payment] AS pay ON  P.PaymentID = pay.PaymentID
-               WHERE Emd.SourceSystem = 'Credit' AND PositionCode = 'Credit' AND P.TotalPayment != 0 $WHERE ) as a GROUP BY CCode,Name,RefNO) as b  GROUP BY CCode,Name";
-               */
-
-               /*
-               $sql_case = "SELECT row_number() OVER (ORDER BY CCode ASC) AS rownum , CCode ,Name,sum(Ref) AS Ref,COUNT(RefNO) AS RefNO,SUM(PAYAMT) AS PAYAMT , '".$searchDate."' as printdate ,'".$teamcode[1]."' AS TeamCode
-               FROM (SELECT CCode,Name,COUNT(RefNO) AS Ref,SUM(PAYAMT) as PAYAMT ,RefNO FROM (SELECT emd.SaleCode As Ccode,emd.EmployeeName AS Name,P.TotalPayment AS PAYAMT,P.DatePayment AS PayDate,P.RefNO
-               FROM [Bighead_Mobile].[dbo].[Receipt] AS P
-               LEFT JOIN [Bighead_Mobile].[dbo].[EmployeeDetail] AS Emd ON P.LastUpdateBy = Emd.EmployeeCode
-               WHERE Emd.SourceSystem = 'Credit' AND PositionCode = 'Credit' AND P.TotalPayment != 0 $WHERE ) as a GROUP BY CCode,Name,RefNO) as b  GROUP BY CCode,Name";
-               */
-
-               /*
-               $sql_case = "SELECT  CCode, Name,SupCode
-              , count(ReceiptCode) as Ref,count(RefNo) as RefNO
-              , sum(TotalPayment) as Payment,sum(Discounts) as PAYAMT , '".$searchDate."' as printdate ,'".$teamcode[1]."' AS TeamCode
-              from (
-              select emp.SaleCode as CCode, emp.EmployeeName as Name, emp.TeamCode,emp.SupervisorCode AS SupCode,vw_PaymentSummary.*
-              from (
-              SELECT Receipt.ReceiptCode, Receipt.TotalPayment, SUM(SalePaymentPeriodPayment.CloseAccountDiscountAmount) AS Discount
-              ,Receipt.TotalPayment-SUM(SalePaymentPeriodPayment.CloseAccountDiscountAmount) AS Discounts, SUM(SalePaymentPeriodPayment.Amount) AS NetPayment, Receipt.RefNo,Receipt.DatePayment, Receipt.CreateBy
-              FROM Receipt INNER JOIN SalePaymentPeriodPayment ON Receipt.ReceiptID = SalePaymentPeriodPayment.ReceiptID
-              WHERE $WHERE AND TotalPayment > 0
-              GROUP BY Receipt.ReceiptCode, Receipt.TotalPayment, Receipt.RefNo, Receipt.DatePayment, Receipt.CreateBy)
-              AS vw_PaymentSummary
-              inner join EmployeeDetail emp on vw_PaymentSummary.CreateBy = emp.EmployeeCode
-              where emp.PositionCode = 'credit' $WHERE2
-              )
-              AS vw_ReceiptByEmployee
-              group by CCode, Name ,SupCode
-              ";
-              */
               $sql_case = "SELECT  CCode, Name,SupCode
               , sum(ReceiptCode) as Ref,count(RefNo) as RefNO
               , sum(TotalPayment) as Payment,sum(Discounts) as PAYAMT , '".$searchDate."' as printdate ,'".$teamcode[1]."' AS TeamCode

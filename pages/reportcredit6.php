@@ -166,39 +166,28 @@ if (!empty($_REQUEST['tip']) ) {
                $dateTo1 = "'".$tip[4]."' AS StartDate";
                $dateTo2 = "'".$tip[5]."' AS StopDate";
              }
-             $printHead = "รายงานการวิ่งงานรายทริป  ระหว่างวันที่ ".DateThai($tip[2])." - ".DateThai($tip[3])." ".$teamcode[1]." ".$teamcode[2]." ";
-               /*
-            $sql_case = "SELECT Trip.SERVICE,ed.EmployeeName
-            , count(ContractCount) as StartContCount
-            ,isnull(convert(int,right(ed.SaleCode,3)),0) as Zone
-            ,ed.SupervisorCode
-            ,(SELECT COUNT(RefNo) AS RefNo FROM (SELECT DISTINCT RefNo FROM [Bighead_Mobile].[dbo].[Payment] WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."' AND PAYAMT > 0) AS A) AS sumCont
-            ,(SELECT COUNT(RefNo) AS RefNo FROM [Bighead_Mobile].[dbo].[Payment] WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."' AND PAYAMT > 0) AS sumReceipt
-            ,$dateTo1
-            ,$dateTo2
-            ,isnull((SELECT SUM(PAYAMT) AS PAYAMT FROM [Bighead_Mobile].[dbo].[Payment] WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."'),0) As sumPay
-            ,'1' As pointer
-            FROM (
-            SELECT contract.SERVICE,contno AS ContractCount
-            FROM Contract
-            INNER JOIN SalePaymentPeriod ON Contract.RefNo = SalePaymentPeriod.RefNo
-            WHERE        (SalePaymentPeriod.TripID = '".$tip[0]."' )
-            AND (Contract.STATUS IN ('NORMAL', 'F')) AND (Contract.service not like 'Y%' AND Contract.service not like '0%')
-            GROUP BY CONTNO,SERVICE) AS Trip
-            left join Bighead_Mobile.dbo.EmployeeDetail as ed on Trip.service = ed.salecode
-            WHERE  ed.SourceSystem != 'sale' $WHERE and ed.SaleCode is not null AND ed.EmployeeCode not like 'Z%'
-            group by ed.EmployeeName,ed.SaleCode,ed.SupervisorCode,trip.SERVICE ";
-            */
+             $printHead = "รายงานการวิ่งงานรายทริป ระหว่างวันที่ ".DateThai($tip[2])." - ".DateThai($tip[3])." ".$teamcode[1]." ".$teamcode[2]." ";
 
             $sql_case = "SELECT Trip.SERVICE,ed.EmployeeName
             , count(ContractCount) as StartContCount
             ,isnull(convert(int,right(ed.SaleCode,3)),0) as Zone
             ,ed.SupervisorCode
+            /*
             ,(SELECT Count(DISTINCT RefNo) FROM [Bighead_Mobile].[dbo].[Payment] WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."' AND PAYAMT > 0) AS sumCont
-            ,(SELECT COUNT(DISTINCT ReceiptCode) AS RefNo FROM [Bighead_Mobile].[dbo].[Payment] AS P INNER JOIN Bighead_Mobile.dbo.SalePaymentPeriodPayment AS sP ON SP.PaymentID = P.PaymentID INNER JOIN Bighead_Mobile.dbo.Receipt AS R ON R.ReceiptID = sp.ReceiptID WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."' AND TotalPayment > 0) AS sumReceipt
+            */
+            ,(SELECT COUNT(P.refno)
+            FROM Bighead_Mobile.dbo.Payment AS P
+            inner join Bighead_Mobile.dbo.Contract AS C ON P.refno = C.refno
+            WHERE TripID = '".$tip[0]."' AND PAYAMT > 0 AND C.Service = Trip.SERVICE
+            GROUP BY C.Service) AS sumCont
+
+            ,(SELECT COUNT(DISTINCT ReceiptCode) AS RefNo FROM [Bighead_Mobile].[dbo].[Payment] AS P
+            INNER JOIN Bighead_Mobile.dbo.SalePaymentPeriodPayment AS sP ON SP.PaymentID = P.PaymentID
+            INNER JOIN Bighead_Mobile.dbo.Receipt AS R ON R.ReceiptID = sp.ReceiptID WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."' AND TotalPayment > 0) AS sumReceipt
             ,$dateTo1
             ,$dateTo2
-            ,isnull((SELECT SUM(PAYAMT) AS PAYAMT FROM [Bighead_Mobile].[dbo].[Payment] WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."'),0) As sumPay
+            ,isnull((SELECT SUM(PAYAMT) AS PAYAMT FROM [Bighead_Mobile].[dbo].[Payment]
+            WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."'),0) As sumPay
             ,'1' As pointer
             ,'".$printHead."' as printHead
             FROM (SELECT contract.SERVICE,contract.contno AS ContractCount
@@ -206,11 +195,11 @@ if (!empty($_REQUEST['tip']) ) {
               INNER JOIN SalePaymentPeriod
               ON Contract.RefNo = SalePaymentPeriod.RefNo
               INNER JOIN Payment ON Contract.RefNo = Payment.RefNo
-              WHERE (Contract.status in ('NORMAL') OR (Contract.STATUS = 'F' AND Payment.TripID = '".$tip[0]."'))
+              WHERE ((Contract.status in ('NORMAL')  AND Contract.isActive = 1) OR (Contract.STATUS = 'F' AND Payment.TripID = '".$tip[0]."'))
               AND (Contract.service not like 'Y%' AND Contract.service not like '0%')
               GROUP BY contract.CONTNO,SERVICE) AS Trip
             left join Bighead_Mobile.dbo.EmployeeDetail as ed on Trip.service = ed.salecode
-            WHERE  ed.SourceSystem != 'sale' $WHERE and PositionCode LIKE 'credit%' and ed.SaleCode is not null AND ed.EmployeeCode not like 'Z%'
+            WHERE  ed.SourceSystem != 'sale' $WHERE and PositionCode LIKE 'credit%'  and ed.SaleCode is not null AND ed.EmployeeCode not like 'Z%'
             group by ed.EmployeeName,ed.SaleCode,ed.SupervisorCode,trip.SERVICE ";
 
             ?>
@@ -253,7 +242,7 @@ if (!empty($_REQUEST['tip']) ) {
                 <?php
 
                     $sql = "SELECT SUM(StartContCount) as totalStartContCount,sum(sumCont) as totalContno,sum(sumReceipt) as totalReceipt,sum(sumPay) as totalPay FROM (".$sql_case." ) AS Total";
-                    //echo $sql;
+                    //echo $sql_case;
 
                     $stmt = sqlsrv_query($conn,$sql);
                     while ($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
@@ -352,11 +341,11 @@ if (!empty($_REQUEST['tip']) ) {
               <?php
 
               //echo $sql_case;
-
+              /*
               $file = fopen("../tsr_SaleReport/pages/sqlText1.txt","w");
               fwrite($file,$sql_case);
               fclose($file);
-              /*
+
               $file1 = fopen("../tsr_SaleReport/pages/sqlText3.txt","w");
               fwrite($file1,$dateSearch);
               fclose($file1);

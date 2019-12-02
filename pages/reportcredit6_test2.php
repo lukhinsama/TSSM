@@ -1,7 +1,10 @@
 <?php
 //ini_set('display_errors', 'on');
 //ini_set('error_reporting', E_ALL);
-
+$limit_per_page = 50;
+$page = (isset($_GET['page'])) ? intval($_GET['page']) : 1;
+$limit_start = (($page - 1) * $limit_per_page) + 1;
+$limit_end = ($page) * $limit_per_page;
 
 if (!empty($_REQUEST['TeamCode']) ) {
   $teamcode = explode("_",$_REQUEST['TeamCode']);
@@ -39,7 +42,7 @@ if (!empty($_REQUEST['tip']) ) {
           </h4>
         </div>
         <div class="col-md-3">
-          <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportcredit6_test">
+          <form role="form" data-toggle="validator" id="formSearch" name="formSearch" method="post" action="index.php?pages=reportcredit6">
             <?php
               if (($_COOKIE['tsr_emp_permit'] != 4 )) {
              ?>
@@ -82,12 +85,12 @@ if (!empty($_REQUEST['tip']) ) {
               WHEN '108' THEN 'เครดิต กรณีพิเศษ'
               WHEN '80101' THEN 'เร่งรัต ทีม 1'
               WHEN '80102' THEN 'เร่งรัต ทีม 2'
-              ELSE [SupervisorCode]
+              ELSE 'ทีมอื่นๆ'
               END AS TeamCode
               FROM [Bighead_Mobile].[dbo].[EmployeeDetail] AS Emd
               LEFT JOIN [Bighead_Mobile].[dbo].[Employee] AS Em
               ON Emd.EmployeeCode = Em.EmpID
-              WHERE ProcessType = 'credit' AND saleCode is not null AND (EmployeeTypeCode is not null AND EmployeeTypeCode != '') $supcode
+              WHERE SourceSystem = 'Credit' AND saleCode is not null AND (EmployeeTypeCode is not null AND EmployeeTypeCode != '') $supcode
               GROUP BY [SupervisorCode]";
 
               //echo $sql_case;
@@ -116,7 +119,7 @@ if (!empty($_REQUEST['tip']) ) {
                   $conn1 = connectDB_BigHead();
 
 
-                  $sql_case = "SELECT top 1 TripID,CONVERT(VARCHAR(10),StartDate,105) AS StartDate, CONVERT(VARCHAR(10),StartDate,20) As StartDate1 ,CONVERT(VARCHAR(10),EndDate,105) AS EndDate, CONVERT(VARCHAR(10),EndDate,20) as EndDate2,TripYearNumber,YearTH,TripNumber FROM Bighead_Mobile.dbo.vw_GetTripAll  WHERE TripYearNumber > '201610' AND StartDate < GETDATE() ORDER BY TripYearNumber DESC";
+                  $sql_case = "SELECT TripID,CONVERT(VARCHAR(10),StartDate,105) AS StartDate, CONVERT(VARCHAR(10),StartDate,20) As StartDate1 ,CONVERT(VARCHAR(10),EndDate,105) AS EndDate, CONVERT(VARCHAR(10),EndDate,20) as EndDate2,TripYearNumber,YearTH,TripNumber FROM Bighead_Mobile.dbo.vw_GetTripAll  WHERE TripYearNumber > '201610' AND StartDate < GETDATE() ORDER BY TripYearNumber DESC";
                   //echo $sql_case;
                   $stmt = sqlsrv_query($conn1,$sql_case);
 
@@ -159,19 +162,56 @@ if (!empty($_REQUEST['tip']) ) {
                $dateTo1 = "'".$tip[4]."' AS StartDate";
                $dateTo2 = "'".$tip[5]."' AS StopDate";
              }else {
-               $DateBe = "AND cast(PayDate as date)
-               BETWEEN cast('2016-'+ CONVERT(varchar, CONVERT(varchar, DATEPART(mm, GETDATE())) +'-21' as date)
-               AND cast('2016-'+ CONVERT(varchar, DATEPART(mm, DateAdd(month, + 1, GETDATE()))) +'-20' as date)";
+               $DateBe = "AND cast(PayDate as date) BETWEEN cast('2016-'+ CONVERT(varchar, CONVERT(varchar, DATEPART(mm, GETDATE())) +'-21' as date) AND cast('2016-'+ CONVERT(varchar, DATEPART(mm, DateAdd(month, + 1, GETDATE()))) +'-20' as date)";
                $dateTo1 = "'".$tip[4]."' AS StartDate";
                $dateTo2 = "'".$tip[5]."' AS StopDate";
              }
              $printHead = "รายงานการวิ่งงานรายทริป  ระหว่างวันที่ ".DateThai($tip[2])." - ".DateThai($tip[3])." ".$teamcode[1]." ".$teamcode[2]." ";
+               /*
+            $sql_case = "SELECT Trip.SERVICE,ed.EmployeeName
+            , count(ContractCount) as StartContCount
+            ,isnull(convert(int,right(ed.SaleCode,3)),0) as Zone
+            ,ed.SupervisorCode
+            ,(SELECT COUNT(RefNo) AS RefNo FROM (SELECT DISTINCT RefNo FROM [Bighead_Mobile].[dbo].[Payment] WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."' AND PAYAMT > 0) AS A) AS sumCont
+            ,(SELECT COUNT(RefNo) AS RefNo FROM [Bighead_Mobile].[dbo].[Payment] WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."' AND PAYAMT > 0) AS sumReceipt
+            ,$dateTo1
+            ,$dateTo2
+            ,isnull((SELECT SUM(PAYAMT) AS PAYAMT FROM [Bighead_Mobile].[dbo].[Payment] WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."'),0) As sumPay
+            ,'1' As pointer
+            FROM (
+            SELECT contract.SERVICE,contno AS ContractCount
+            FROM Contract
+            INNER JOIN SalePaymentPeriod ON Contract.RefNo = SalePaymentPeriod.RefNo
+            WHERE        (SalePaymentPeriod.TripID = '".$tip[0]."' )
+            AND (Contract.STATUS IN ('NORMAL', 'F')) AND (Contract.service not like 'Y%' AND Contract.service not like '0%')
+            GROUP BY CONTNO,SERVICE) AS Trip
+            left join Bighead_Mobile.dbo.EmployeeDetail as ed on Trip.service = ed.salecode
+            WHERE  ed.SourceSystem != 'sale' $WHERE and ed.SaleCode is not null AND ed.EmployeeCode not like 'Z%'
+            group by ed.EmployeeName,ed.SaleCode,ed.SupervisorCode,trip.SERVICE ";
+            */
 
-
-            $sql_case = "SELECT SaleCode,EmployeeName,EmployeeCode, ISNULL(CardInForm,0) AS CardInForm ,ISNULL(CardPaymentComplete,0) AS CardPaymentComplete,ISNULL(ReceiptComplete,0) AS ReceiptComplete,ISNULL(AmountComplete,0) AS AmountComplete
-  FROM [TSRData_Source].[dbo].[TSSM_LogCreditTrip]
-  WHERE TripID = '".$tip[0]."'
-  AND LEFT(SaleCode,1) = '1'";
+            $sql_case = "SELECT Trip.SERVICE,ed.EmployeeName
+            , count(ContractCount) as StartContCount
+            ,isnull(convert(int,right(ed.SaleCode,3)),0) as Zone
+            ,ed.SupervisorCode
+            ,(SELECT Count(DISTINCT RefNo) FROM [Bighead_Mobile].[dbo].[Payment] WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."' AND PAYAMT > 0) AS sumCont
+            ,(SELECT COUNT(DISTINCT ReceiptCode) AS RefNo FROM [Bighead_Mobile].[dbo].[Payment] AS P INNER JOIN Bighead_Mobile.dbo.SalePaymentPeriodPayment AS sP ON SP.PaymentID = P.PaymentID INNER JOIN Bighead_Mobile.dbo.Receipt AS R ON R.ReceiptID = sp.ReceiptID WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."' AND TotalPayment > 0) AS sumReceipt
+            ,$dateTo1
+            ,$dateTo2
+            ,isnull((SELECT SUM(PAYAMT) AS PAYAMT FROM [Bighead_Mobile].[dbo].[Payment] WHERE CashCode = Trip.SERVICE AND TripID = '".$tip[0]."'),0) As sumPay
+            ,'1' As pointer
+            ,'".$printHead."' as printHead
+            FROM (SELECT contract.SERVICE,contract.contno AS ContractCount
+              FROM Contract
+              INNER JOIN SalePaymentPeriod
+              ON Contract.RefNo = SalePaymentPeriod.RefNo
+              INNER JOIN Payment ON Contract.RefNo = Payment.RefNo
+              WHERE (Contract.status in ('NORMAL') OR (Contract.STATUS = 'F' AND Payment.TripID = '".$tip[0]."'))
+              AND (Contract.service not like 'Y%' AND Contract.service not like '0%')
+              GROUP BY contract.CONTNO,SERVICE) AS Trip
+            left join Bighead_Mobile.dbo.EmployeeDetail as ed on Trip.service = ed.salecode
+            WHERE  ed.SourceSystem != 'sale' $WHERE and PositionCode LIKE 'credit%' and ed.SaleCode is not null AND ed.EmployeeCode not like 'Z%'
+            group by ed.EmployeeName,ed.SaleCode,ed.SupervisorCode,trip.SERVICE ";
 
             ?>
 
@@ -212,40 +252,40 @@ if (!empty($_REQUEST['tip']) ) {
                 </tr>
                 <?php
 
-                    $sql = "SELECT SUM(CardInForm) as totalCardInForm,sum(CardPaymentComplete) as totalCardPaymentComplete,sum(ReceiptComplete) as totalReceiptComplete,sum(AmountComplete) as totalAmountComplete FROM (".$sql_case." ) AS Total";
-                    //echo $sql;
+                    $sql = "SELECT SUM(StartContCount) as totalStartContCount,sum(sumCont) as totalContno,sum(sumReceipt) as totalReceipt,sum(sumPay) as totalPay FROM (".$sql_case." ) AS Total";
+                    //echo $sql_case;
 
                     $stmt = sqlsrv_query($conn,$sql);
                     while ($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
-                      if(((($row['totalCardInForm']-$row['totalCardPaymentComplete'])/$row['totalCardInForm'])*100)<0){
+                      if(((($row['totalStartContCount']-$row['totalContno'])/$row['totalStartContCount'])*100)<0){
                         $percenTotalMaiDai = "0";
                       }else {
-                        $percenTotalMaiDai = (($row['totalCardInForm']-$row['totalCardPaymentComplete'])/$row['totalCardInForm'])*100;
+                        $percenTotalMaiDai = (($row['totalStartContCount']-$row['totalContno'])/$row['totalStartContCount'])*100;
                       }
-                          if (($row['totalCardInForm']-$row['totalCardPaymentComplete']) < 0) {
+                          if (($row['totalStartContCount']-$row['totalContno']) < 0) {
                             $notcount = "0";
                           }else{
-                            $notcount = number_format($row['totalCardInForm']-$row['totalCardPaymentComplete']);
+                            $notcount = number_format($row['totalStartContCount']-$row['totalContno']);
                           }
                       $httpExcel2 .= "<tr>
                         <td></td><td></td>
-                        <td style=\"text-align: center\">".number_format($row['totalCardInForm'])."</td>
-                        <td style=\"text-align: center\">".number_format($row['totalCardPaymentComplete'])."</td>
-                        <td style=\"text-align: center\">".number_format(($row['totalCardPaymentComplete']/$row['totalCardInForm'])*100,2)." %</td>
+                        <td style=\"text-align: center\">".number_format($row['totalStartContCount'])."</td>
+                        <td style=\"text-align: center\">".number_format($row['totalContno'])."</td>
+                        <td style=\"text-align: center\">".number_format(($row['totalContno']/$row['totalStartContCount'])*100,2)." %</td>
                         <td style=\"text-align: center\">".$notcount."</td>
                         <td style=\"text-align: center\">".number_format($percenTotalMaiDai,2)." %</td>
-                        <td style=\"text-align: center\">".number_format($row['totalReceiptComplete'])."</td>
-                        <td style=\"text-align: right\">".number_format($row['totalAmountComplete'],2)."</td>
+                        <td style=\"text-align: center\">".number_format($row['totalReceipt'])."</td>
+                        <td style=\"text-align: right\">".number_format($row['totalPay'],2)."</td>
                       </tr>";
                  ?>
                  <tr>
-                   <td style="text-align: center"><?=number_format($row['totalCardInForm'])?></td>
-                   <td style="text-align: center"><?=number_format($row['totalCardPaymentComplete'])?></td>
-                   <td style="text-align: center"><?=number_format(($row['totalCardPaymentComplete']/$row['totalCardInForm'])*100,2)?> %</td>
-                   <td style="text-align: center"><?php if (($row['totalCardInForm']-$row['totalCardPaymentComplete']) < 0) { echo "0";}else{ echo number_format($row['totalCardInForm']-$row['totalCardPaymentComplete']);}?></td>
+                   <td style="text-align: center"><?=number_format($row['totalStartContCount'])?></td>
+                   <td style="text-align: center"><?=number_format($row['totalContno'])?></td>
+                   <td style="text-align: center"><?=number_format(($row['totalContno']/$row['totalStartContCount'])*100,2)?> %</td>
+                   <td style="text-align: center"><?php if (($row['totalStartContCount']-$row['totalContno']) < 0) { echo "0";}else{ echo number_format($row['totalStartContCount']-$row['totalContno']);}?></td>
                    <td style="text-align: center"><?=number_format($percenTotalMaiDai,2)?> %</td>
-                   <td style="text-align: center"><?=number_format($row['totalReceiptComplete'])?></td>
-                   <td style="text-align: center"><?=number_format($row['totalAmountComplete'],2)?></td>
+                   <td style="text-align: center"><?=number_format($row['totalReceipt'])?></td>
+                   <td style="text-align: center"><?=number_format($row['totalPay'],2)?></td>
                  </tr>
                 <?php
                   }
@@ -348,44 +388,44 @@ if (!empty($_REQUEST['tip']) ) {
               ?>
 
             <?php
-
-                if(((($row['CardInForm']-$row['CardPaymentComplete'])/$row['CardInForm'])*100)<0){
+              if ($row['pointer'] == '1') {
+                if(((($row['StartContCount']-$row['sumCont'])/$row['StartContCount'])*100)<0){
                   $percenMaiDai = "0";
                 }else {
-                  $percenMaiDai = (($row['CardInForm']-$row['CardPaymentComplete'])/$row['CardInForm'])*100;
+                  $percenMaiDai = (($row['StartContCount']-$row['sumCont'])/$row['StartContCount'])*100;
                 }
 
-              if (($row['CardInForm']-$row['CardPaymentComplete']) < 0) {
+              if (($row['StartContCount']-$row['sumCont']) < 0) {
                 $notcount = "0";
               }else{
-                $notcount = number_format($row['CardInForm']-$row['CardPaymentComplete']);
+                $notcount = number_format($row['StartContCount']-$row['sumCont']);
               }
 
                 $httpExcel2 .= "<tr>
-                  <td style=\"text-align: center\">".$row['SaleCode']."</td>
+                  <td style=\"text-align: center\">".$row['Zone']."</td>
                   <td>".$row['EmployeeName']."</td>
-                  <td style=\"text-align: center\">".$row['CardInForm']."</td>
-                  <td style=\"text-align: center\">".$row['CardPaymentComplete']."</td>
-                  <td style=\"text-align: center\">".number_format(($row['CardPaymentComplete']/$row['CardInForm'])*100,2)." %</td>
+                  <td style=\"text-align: center\">".$row['StartContCount']."</td>
+                  <td style=\"text-align: center\">".$row['sumCont']."</td>
+                  <td style=\"text-align: center\">".number_format(($row['sumCont']/$row['StartContCount'])*100,2)." %</td>
                   <td style=\"text-align: center\">".$notcount."</td>
                   <td style=\"text-align: center\">".number_format($percenMaiDai,2)." %</td>
-                  <td style=\"text-align: center\">".$row['ReceiptComplete']."</td>
-                  <td style=\"text-align: right\">".number_format($row['AmountComplete'],2)."</td>
+                  <td style=\"text-align: center\">".$row['sumReceipt']."</td>
+                  <td style=\"text-align: right\">".number_format($row['sumPay'],2)."</td>
                 </tr>";
              ?>
             <tr>
-              <td style="text-align: center"><?=$row['SaleCode']?></td>
+              <td style="text-align: center"><?=$row['Zone']?></td>
               <td><?=$row['EmployeeName']?></td>
-              <td style="text-align: center"><?=$row['CardInForm']?></td>
-              <td style="text-align: center"><?=$row['CardPaymentComplete']?></td>
-              <td style="text-align: center"><?=number_format(($row['CardPaymentComplete']/$row['CardInForm'])*100,2)?> %</td>
-              <td style="text-align: center"><?php if (($row['CardInForm']-$row['CardPaymentComplete']) < 0) { echo "0";}else{ echo $row['CardInForm']-$row['CardPaymentComplete'];}?></td>
+              <td style="text-align: center"><?=$row['StartContCount']?></td>
+              <td style="text-align: center"><!--<a href="#" onClick="js_popup('pages/testDeteilLog1.php?EmpID=<?=$row['AssigneeEmpID']?>&StartDate=<?=$row['StartDate']?>&EndDate=<?=$row['StopDate']?>',783,600); return false;" title="">--><?=$row['sumCont']?><!--</a></font>--></td>
+              <td style="text-align: center"><?=number_format(($row['sumCont']/$row['StartContCount'])*100,2)?> %</td>
+              <td style="text-align: center"><?php if (($row['StartContCount']-$row['sumCont']) < 0) { echo "0";}else{ echo $row['StartContCount']-$row['sumCont'];}?></td>
               <td style="text-align: center"><?=number_format($percenMaiDai,2)?> %</td>
-              <td style="text-align: center"><?=$row['ReceiptComplete']?></td>
-              <td style="text-align: right"><?=number_format($row['AmountComplete'],2)?></td>
+              <td style="text-align: center"><?=$row['sumReceipt']?></td>
+              <td style="text-align: right"><?=number_format($row['sumPay'],2)?></td>
             </tr>
               <?php
-
+            }
                 }
 
                ?>

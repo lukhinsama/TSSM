@@ -1,6 +1,6 @@
 <?php
-//ini_set('display_errors', 'on');
-//ini_set('error_reporting', E_ALL);
+ini_set('display_errors', 'on');
+ini_set('error_reporting', E_ALL);
 $limit_per_page = 100;
 $page = (isset($_GET['page'])) ? intval($_GET['page']) : 1;
 $limit_start = (($page - 1) * $limit_per_page) + 1;
@@ -38,11 +38,19 @@ if (empty($_REQUEST['startDate']) && empty($_REQUEST['endDate'])) {
 }
 
 if (($_COOKIE['tsr_emp_permit'] == 4 )) {
-  if (substr($_COOKIE['tsr_emp_id'],0,1) == "0") {
+    if (substr($_COOKIE['tsr_emp_id'],0,1) == "0") {
     $EmpID['0'] = "A".substr($_COOKIE['tsr_emp_id'],1,5);
     $EmpID['1'] = $_COOKIE['tsr_emp_name'];
-    $WHERE .= " AND R.ZoneCode = '".$EmpID['2']."'";
+
+    $sql = "SELECT TOP 1 SaleCode FROM Bighead_Mobile.dbo.EmployeeDetail WHERE EmployeeCode = '".$EmpID['0']."' AND SaleCode IS NOT NULL";
+    $conn = connectDB_BigHead();
+    $stmt = sqlsrv_query($conn,$sql);
+    if ($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
+        $WHERE .= " AND R.ZoneCode = '".$row['SaleCode']."'";
+    }
+    sqlsrv_close($conn);
   }
+
 }else {
   if (empty($_REQUEST['EmpID'])) {
     $EmpID = array('0','-');
@@ -189,7 +197,7 @@ if (!empty($_REQUEST['sortcontno'])) {
               <P><center><B>รายงานยกเลิกใบเสร็จรายบุคคล </B></center></P>
               <table width="100%">
                 <tr>
-                  <td>พนักงานเก็บเงิน : <?=$EmpID['0']?> , <?=$EmpID['2']?> , <?=$EmpID['3']?></td>
+                  <td>พนักงานเก็บเงิน : <?=$EmpID['0']?></td>
                   <td><?=$EmpID['1']?></td>
                   <td>ประจำวันที่ : <?=$searchDate?></td>
                   <td>พิมพ์โดย : <?=$_COOKIE['tsr_emp_name']?></td>
@@ -198,7 +206,7 @@ if (!empty($_REQUEST['sortcontno'])) {
             </div>
             <?php
             $httpExcelHead = "<P><center><B>รายงานยกเลิกใบเสร็จรายบุคคล </B></center></P>
-          <P><center><B> พนักงานเก็บเงิน : ".$EmpID['0']." , ".$EmpID['2']." ประจำวันที่ : ".$searchDate." พิมพ์โดย : ".$_COOKIE['tsr_emp_name']."</B></center></P>";
+          <P><center><B> พนักงานเก็บเงิน : ".$EmpID['0']." ประจำวันที่ : ".$searchDate." พิมพ์โดย : ".$_COOKIE['tsr_emp_name']."</B></center></P>";
 
              ?>
           <!--<div class="box-body table-responsive no-padding">-->
@@ -234,41 +242,32 @@ if (!empty($_REQUEST['sortcontno'])) {
               </thead>
               <tbody>";
                 $httpExcel2 = "";
-                /*
-            $sql_select = "SELECT DISTINCT R.ReceiptCode,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate  ,CONVERT(varchar(20),RV.LastUpdateDate,105) +' '+ CONVERT(varchar(5),RV.LastUpdateDate,108) as LastUpdateDate ,case when count(R.ReceiptCode) = 1 then convert(varchar,min(S.PaymentPeriodNumber)) else convert(varchar,min(S.PaymentPeriodNumber)) end as PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,Sy.Amount AS PAYAMT,R.TotalPayment AS PAYAMTS  ,Em.EmpID,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , Ed.FirstName + ' ' + Ed.LastName AS Names";
-
-            $sql_body = " FROM TSRDATA_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) LEFT JOIN Bighead_Mobile.dbo.ReceiptVoid AS RV ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.LastUpdateBy = EM.EmpID LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' AND Ed.EmployeeTypeCode like 'Credit%' AND Ed.SaleCode is not null WHERE $WHERE  AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0 GROUP BY R.ReceiptCode,R.DatePayment,c.CONTNO,CustomerName,Sy.Amount,R.TotalPayment,Em.EmpID,ed.SaleCode,Ed.FirstName,Ed.LastName,R.ZoneCode,RV.LastUpdateDate $sort";
-
-            $sql_print = "SELECT DISTINCT ReceiptCode
-            ,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate
-            ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,R.TotalPayment AS PAYAMT
-            ,ISNULL ((select SendAmount from [Bighead_Mobile].[dbo].SendMoney  WHERE SaveTransactionNoDate is not null  AND CreateBy = em.EmpID AND SaveTransactionNoDate BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59' ),0) as Sendmoney, R.CreateBy AS EmpID ,'".$searchDate."' AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName ,Em.EmpID,case when ed.SaleCode is null then '-' else ed.SaleCode end as SaleCode , 'รายงานยกเลิกใบเสร็จรายบุคคล' AS printHead,'".$EmpID['1']."' AS Names";
-
-            $sql_body_print = " FROM Bighead_Mobile.dbo.vw_ReceiptWithZone AS R LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.CreateBy = EM.EmpID LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' AND Ed.EmployeeTypeCode like 'Credit%' AND Ed.SaleCode is not null WHERE $WHERE  AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0  $sort";
-            */
 
 
-            $sql_select = "SELECT $top row_number() OVER (ORDER BY R.ReceiptCode ASC) AS rownum,R.ReceiptCode,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate  ,CONVERT(varchar(20),RV.LastUpdateDate,105) +' '+ CONVERT(varchar(5),RV.LastUpdateDate,108) as LastUpdateDate ,case when count(R.ReceiptCode) = 1 then convert(varchar,min(S.PaymentPeriodNumber)) else convert(varchar,min(S.PaymentPeriodNumber)) end as PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,Sy.Amount AS PAYAMT,R.TotalPayment AS PAYAMTS  ,Em.EmpID,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , Ed.FirstName + ' ' + Ed.LastName AS Names";
 
-            $sql_body = " FROM TSRDATA_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) LEFT JOIN Bighead_Mobile.dbo.ReceiptVoid AS RV ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.LastUpdateBy = EM.EmpID LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' AND Ed.SaleCode is not null WHERE $WHERE  AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0 GROUP BY R.ReceiptCode,R.DatePayment,c.CONTNO,CustomerName,Sy.Amount,R.TotalPayment,Em.EmpID,ed.SaleCode,Ed.FirstName,Ed.LastName,R.ZoneCode,RV.LastUpdateDate $sort";
+            $sql_select = "SELECT $top row_number() OVER (ORDER BY R.ReceiptCode ASC) AS rownum, R.CreateBy AS EmpID, Ed.FirstName + ' ' + Ed.LastName AS Names , CONVERT(varchar,R.DatePayment,105) AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , 'รายงานยกเลิกใบเสร็จรายบุคคล' AS printHead ,R.ReceiptCode,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate  ,CONVERT(varchar(20),RV.LastUpdateDate,105) +' '+ CONVERT(varchar(5),RV.LastUpdateDate,108) as LastUpdateDate ,case when count(R.ReceiptCode) = 1 then convert(varchar,min(S.PaymentPeriodNumber)) else convert(varchar,min(S.PaymentPeriodNumber)) end as PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,Sy.Amount AS PAYAMT,R.TotalPayment AS PAYAMTS  ,Em.EmpID,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , Ed.FirstName + ' ' + Ed.LastName AS Names ";
+
+            $sql_body = " FROM TSRDATA_Source.dbo.vw_ReceiptWithZone AS R WITH(NOLOCK) LEFT JOIN Bighead_Mobile.dbo.ReceiptVoid AS RV ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.LastUpdateBy = EM.EmpID LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' AND Ed.SaleCode is not null WHERE $WHERE  AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0 GROUP BY R.CreateBy, R.ReceiptCode,R.DatePayment,c.CONTNO,CustomerName,Sy.Amount,R.TotalPayment,Em.EmpID,ed.SaleCode,Ed.FirstName,Ed.LastName,R.ZoneCode,RV.LastUpdateDate $sort";
 
             $sql_print = "SELECT DISTINCT R.ReceiptCode
             ,CONVERT(varchar(20),R.DatePayment,105) +' '+ CONVERT(varchar(5),R.DatePayment,108) as PaymentDueDate
             ,Right('000'+Convert(Varchar,S.PaymentPeriodNumber),2) As PaymentPeriodNumber,c.CONTNO AS CONTNO,CustomerName,R.TotalPayment AS PAYAMT
-            ,ISNULL ((select SendAmount from [Bighead_Mobile].[dbo].SendMoney  WHERE SaveTransactionNoDate is not null  AND CreateBy = em.EmpID AND SaveTransactionNoDate BETWEEN '".DateEng($_REQUEST['searchDate'])." 00:00' AND '".DateEng($_REQUEST['searchDate'])." 23:59' ),0) as Sendmoney, R.CreateBy AS EmpID, Ed.FirstName + ' ' + Ed.LastName AS Names , CONVERT(varchar,R.DatePayment,105) AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName ,Em.EmpID,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , 'รายงานยกเลิกใบเสร็จรายบุคคล' AS printHead";
+            ,ISNULL ((select SendAmount from [Bighead_Mobile].[dbo].SendMoney  WHERE SaveTransactionNoDate is not null  AND CreateBy = em.EmpID AND SaveTransactionNoDate BETWEEN '".DateEng($_REQUEST['startDate'])." 00:00' AND '".DateEng($_REQUEST['endDate'])." 23:59' ),0) as Sendmoney, R.CreateBy AS EmpID, Ed.FirstName + ' ' + Ed.LastName AS Names , CONVERT(varchar,R.DatePayment,105) AS Paydate , '".$_COOKIE['tsr_emp_name']."' AS PrintName ,Em.EmpID,case when ed.SaleCode is null then R.ZoneCode else ed.SaleCode end as SaleCode , 'รายงานยกเลิกใบเสร็จรายบุคคล' AS printHead";
 
             $sql_body_print = " FROM Bighead_Mobile.dbo.vw_ReceiptWithZone AS R LEFT JOIN Bighead_Mobile.dbo.ReceiptVoid AS RV ON R.ReceiptID = RV.ReceiptID LEFT JOIN Bighead_Mobile.dbo.Contract AS C ON R.RefNo = C.RefNo LEFT JOIN Bighead_Mobile.dbo.vw_GetCustomer AS GC ON C.CustomerID = GC.CustomerID LEFT JOIN SalePaymentPeriodPayment As Sy ON R.PaymentID = Sy.PaymentID AND R.ReceiptID = Sy.ReceiptID LEFT JOIN Bighead_Mobile.dbo.SalePaymentPeriod AS S ON S.SalePaymentPeriodID = Sy.SalePaymentPeriodID LEFT JOIN Bighead_Mobile.dbo.Employee AS Em ON R.CreateBy = EM.EmpID LEFT JOIN Bighead_Mobile.dbo.EmployeeDetail AS Ed ON Ed.EmployeeCode = EM.EmpID AND Ed.SourceSystem = 'Credit' AND Ed.SaleCode is not null WHERE $WHERE  AND S.SalePaymentPeriodID = Sy.SalePaymentPeriodID AND Sy.Amount = 0  $sort";
 
 
               $sql_case = $sql_select." ".$sql_body;
 
-              $sql_print = $sql_print." ".$sql_body_print;
+              //$sql_print = $sql_print." ".$sql_body_print;
+              $sql_print = $sql_case;
 
               //echo $sql_print;
+              /*
               $file = fopen("../tsr_SaleReport/pages/sqlText.txt","w");
               fwrite($file,$sql_print);
               fclose($file);
-
+              */
               $conns = connectDB_TSR();
               // เพิ่มลงฐานข้อมูล
               $sql_insert = "INSERT INTO TSR_Application.dbo.TSS_ReportCredit_2_sys (Empid,[SQLtext],addtime,rpttype) VALUES (?,?,GETDATE(),5)";
