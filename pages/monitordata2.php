@@ -1,10 +1,7 @@
 <?php
 //ini_set('display_errors', 'on');
 //ini_set('error_reporting', E_ALL);
-$limit_per_page = 100;
-$page = (isset($_GET['page'])) ? intval($_GET['page']) : 1;
-$limit_start = (($page - 1) * $limit_per_page) + 1;
-$limit_end = ($page) * $limit_per_page;
+
 if (!empty($_REQUEST['searchText'])) {
   $_REQUEST['CreditID'] = $_REQUEST['searchText'];
 }
@@ -101,8 +98,8 @@ if (!empty($_REQUEST['searchText'])) {
               <tr>
                 <th rowspan="2" style="text-align: center">ลำดับ</th>
                 <?php
-                $conn = connectDB_TSR();
-                $sql_case = "SELECT count(CONTNO) as num  FROM [TSR_Application].[dbo].[View_Bighead_credit_1_bak]  where mcode = '".$_REQUEST['CreditID']."'";
+                $conn = connectDB_BigHead();
+                $sql_case = "SELECT count(CONTNO) as num  FROM [TSRData_Source].[dbo].[vw_TSSM_BigHead_Contract_Active]  where mcode = '".$_REQUEST['CreditID']."'";
 
                 //echo $sql_case;
                 //$num_row = checkNumRow($conn,$sql_case);
@@ -117,7 +114,7 @@ if (!empty($_REQUEST['searchText'])) {
                 <?php
                   }
 
-                  $sql_case = "SELECT count([CONTNO]) as num FROM [TSR_Application].[dbo].[View_Bighead_credit_2] where mcode = '".$_REQUEST['CreditID']."'";
+                  $sql_case = "SELECT count([CONTNO]) as num FROM [TSRData_Source].[dbo].[TSSM_RedHouse_Contract_Active] where mcode = '".$_REQUEST['CreditID']."'";
 
                   //echo $sql_case;
                   //$num_row = checkNumRow($conn,$sql_case);
@@ -149,14 +146,16 @@ if (!empty($_REQUEST['searchText'])) {
               </tr>
 
               <?php
-              $conn = connectDB_TSR();
-              $sql_case = "SELECT row_number() OVER (ORDER BY c2.contno,c1.contno ASC) AS rownum ,c2.contno as contno2 ,c2.customername as CustomerName2 ,c2.PAYPERIOD as paymentperiodnumber2,c2.PREMIUM as NetAmount2, c2.creditname as CreditName2 ,c2.RefNo As RefNo2 ,c1.contno as contno1,c1.CustomerName as CustomerName1,c1.paymentperiodnumber as paymentperiodnumber1 ,c1.NetAmount as NetAmount1 ,c1.CreditName as CreditName1 , c1.RefNo AS RefNo1
+              $conn = connectDB_BigHead();
+              $sql_case = "SELECT c2.contno as contno2 ,c2.customername as CustomerName2 ,c2.PAYPERIOD as paymentperiodnumber2,c2.PREMIUM as NetAmount2, c2.creditname as CreditName2 ,c2.RefNo As RefNo2 ,c1.contno as contno1,c1.CustomerName as CustomerName1,c1.paymentperiodnumber as paymentperiodnumber1 ,c1.NetAmount as NetAmount1 ,c1.CreditName as CreditName1 , c1.RefNo AS RefNo1
               ,c1.mcode,c2.mcode
-                FROM [TSR_Application].[dbo].[View_Bighead_credit_2] as c2
-                full outer join
-                [TSR_Application].[dbo].[View_Bighead_credit_1_bak] as c1
+              FROM [TSRData_Source].[dbo].[TSSM_RedHouse_Contract_Active] as c2
+              full outer join
+              [TSRData_Source].[dbo].[vw_TSSM_BigHead_Contract_Active] as c1
                 On c1.RefNo = c2.RefNo
-                $where ";
+                $where
+                ORDER BY c2.contno,c1.contno ASC
+                ";
 
               //echo $sql_case;
               //$num_row = checkNumRow($conn,$sql_case);
@@ -166,6 +165,7 @@ if (!empty($_REQUEST['searchText'])) {
               $stmt = sqlsrv_query($conn,$sql_case);
               $contno2 = array("");
               //print_r($contno2);
+              $i = 1;
               while ($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
                 if (!empty($row['contno2'])) {
                   array_push($contno2,$row['contno2']);
@@ -174,7 +174,7 @@ if (!empty($_REQUEST['searchText'])) {
               ?>
 
               <tr>
-                <td style="text-align: center;"><?=$row['rownum']?></td>
+                <td style="text-align: center;"><?=$i?></td>
                 <td><?=$row['contno1']?></td>
                 <td><?=$row['RefNo1']?></td>
                 <td><?=$row['CustomerName1']?></td>
@@ -192,6 +192,7 @@ if (!empty($_REQUEST['searchText'])) {
               </tr>
 
               <?php
+              $i++;
                 }
                 sqlsrv_close($conn);
                ?>

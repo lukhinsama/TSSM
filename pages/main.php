@@ -6,6 +6,9 @@ switch ($_GET['pages']) {
     case "monitordata2":
         include_once("monitordata2.php");
         break;
+    case "monitordata2_bak":
+        include_once("monitordata2_bak.php");
+        break;
     case "monitordata3":
         include_once("monitordata3.php");
         break;
@@ -47,6 +50,53 @@ switch ($_GET['pages']) {
         break;
     case "reportsale9":
         include_once("reportsale9.php");
+        break;
+    case "reportsale10":
+        include_once("reportsale10.php");
+        break;
+    case "reportsale11":
+        include_once("reportsale11.php");
+        break;
+    case "reportsale12":
+        include_once("reportsale12.php");
+        break;
+    case "reportsale13":
+        include_once("reportsale13.php");
+        break;
+    case "reportbrn2":
+        include_once("reportbrn2.php");
+        break;
+    case "reportbrn3":
+        include_once("reportbrn3.php");
+        break;
+    case "reportbrn4":
+        include_once("reportbrn4.php");
+        break;
+    case "reportbrn5":
+        include_once("reportbrn5.php");
+        break;
+    case "reportbrn5_bak":
+        include_once("reportbrn5_bak.php");
+        break;
+        /*
+    case "reportbrn6":
+        include_once("reportbrn6.php");
+        break;
+        */
+    case "reportbrn7":
+        include_once("reportbrn7.php");
+        break;
+    case "reportbrn8":
+        include_once("reportbrn8.php");
+        break;
+    case "reportbrn9":
+        include_once("reportbrn9.php");
+        break;
+    case "reportbrn10":
+        include_once("reportbrn10.php");
+        break;
+    case "reportbrn12":
+        include_once("reportbrn12.php");
         break;
     case "reportcredit1":
         include_once("reportcredit1.php");
@@ -117,6 +167,18 @@ switch ($_GET['pages']) {
     case "reportoper9":
         include_once("reportoper9.php");
         break;
+    case "reportoper15":
+        include_once("reportoper15.php");
+        break;
+    case "reportoper15Test":
+        include_once("reportoper15_test.php");
+        break;
+    case "reportoper16":
+        include_once("reportoper16.php");
+        break;
+    case "reportoper17":
+        include_once("reportoper17.php");
+        break;
     case "reportOperNotSave":
         include_once("reportOperNotSave.php");
         break;
@@ -152,6 +214,24 @@ switch ($_GET['pages']) {
         break;
     case "reportdept8":
         include_once("reportdept8.php");
+        break;
+    case "reportcrd2":
+        include_once("reportcrd2.php");
+        break;
+    case "reportcrd2_bak":
+        include_once("reportcrd2_bak.php");
+        break;
+    case "reportcrd5":
+        include_once("reportCRD5.php");
+        break;
+    case "reporttele2":
+        include_once("reporttele2.php");
+        break;
+    case "reporttele5":
+        include_once("reporttele5.php");
+        break;
+    case "reportinstall5":
+        include_once("reportinstall5.php");
         break;
     case "testReport1":
         include_once("testReport1.php");
@@ -215,6 +295,153 @@ switch ($_GET['pages']) {
         break;
     case "reportsp1":
         include_once("reportsp1.php");
+        break;
+    case "updatepackage":
+        include_once("UpdatePackage.php");
+        break;
+    case "updateComPackage":
+        include_once("updateComPackage.php");
+        break;
+    case "SetUpUser":
+        include_once("setupUser.php");
+        break;
+    case "changeReceiptPeriod":
+        include_once("changeReceiptPeriod.php");
+        break;
+    case "receiptComeBack":
+        include_once("receiptComeBack.php");
+        break;
+    case "addContractTo":
+        include_once("addContractTo.php");
+        break;
+    case "updateReceiptTable":
+        include_once("updateReceiptTable.php");
+        break;
+    case "reportOperPrintReceipt":
+        include_once("reportOperPrintReceipt.php");
+        break;
+    case "monitorReceiptBle":
+        include_once("monitorReceiptBle.php");
+        break;
+    case "monitorContractCrdTele":
+        include_once("monitorContractCrdTele.php");
+        break;
+    case "reportReceiptSendMail":
+        include_once("reportReceiptSendMail.php");
+        break;
+    case "addOutingTrip":
+        include_once("addOutingTrip.php");
+        break;
+    case "addOutingTrip2":
+        include_once("addOutingTrip2.php");
+        break;
+    case "addEmpService":
+        include_once("addEmpService.php");
+        break;
+    case "reportbrn5_test":
+        include_once("reportbrn5_test.php");
+        break;
+    case "reportbrn12_test":
+        include_once("reportbrn12_test.php");
+        break;
+    case "reportfa5":
+        include_once("reportFA5.php");
+        break;
+    case "reuseproduct":
+        include_once("reuseproduct.php");
+        break;
+    case "tranContractFirst":
+        include_once("tranContractFirst.php");
+        break;
+    case "editReceiptManual":
+        include_once("editReceiptManual.php");
+        break;
+    case "reporton1":
+        include_once("reporton1.php");
+        break;
+    case "reporton2":
+        include_once("reporton2.php");
+        break;
+    case "reporton3":
+        include_once("reporton3.php");
+        break;
+    case "monitor_contract":
+        include_once("monitor_contract_rh_and_bh.php");
+        break;
+    case "contractedit":
+        include_once("EditContractAll.php");
+        break;
+    case "contracteditbak":
+        include_once("EditContractAllbak.php");
+        break;
+    case "receiptedit":
+        include_once("EditReceiptAll.php");
+        break;
+    case "monitorpromcredit":
+        include_once("monitor_prom_credit.php");
+        break;
+    case "monitorpromdept":
+        include_once("monitor_prom_dept.php");
+        break;
+    case "monitorpromsale":
+        include_once("monitor_prom_sale.php");
+        break;
+    case "monitorprombrn":
+        include_once("monitor_prom_brn.php");
+        break;
+    case "monitorpromcrd":
+        include_once("monitor_prom_crd.php");
+        break;
+    case "monitorpromtele":
+        include_once("monitor_prom_tele.php");
+        break;
+    case "monitorpromall":
+        include_once("monitor_prom_all.php");
+        break;
+    case "monitorSendMoney":
+        include_once("monitorSendMoney.php");
+        break;
+    case "monitorDiffSendMoneyAll":
+        include_once("monitorDiffSendMoneyAll.php");
+        break;
+    case "monitorDiffSendMoneyCredit":
+        include_once("monitorDiffSendMoney_Credit.php");
+        break;
+    case "monitorDiffSendMoneySale":
+        include_once("monitorDiffSendMoney_Sale.php");
+        break;
+    case "monitorDiffSendMoneyOnline":
+        include_once("monitorDiffSendMoney_Online.php");
+        break;
+    case "monitorDiffSendMoneyCrd":
+        include_once("monitorDiffSendMoney_Crd.php");
+        break;
+    case "monitorDiffSendMoneyOper":
+        include_once("monitorDiffSendMoney_Oper.php");
+        break;
+    case "reportdueturndate":
+        include_once("reportDueTurnDate.php");
+        break;
+    case "reportSendMoney":
+        include_once("reportSendMoney.php");
+        break;
+    case "saleArea":
+        include_once("maptest1.php");
+        break;
+    case "saleAreas":
+        include_once("maptest2.php");
+        break;
+    case "reportib1":
+        include_once("reportib1.php");
+        break;
+    case "reportib2":
+        include_once("reportib2.php");
+        break;
+    case "reportib3":
+        include_once("reportib3.php");
+        break;
+    case "reportfa1":
+        include_once("reportFA1.php");
         break;
     default:
         include_once("blank.php");

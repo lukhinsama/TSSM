@@ -16,16 +16,35 @@ if ((isset($_REQUEST['searchText']))) {
 }
 
 
-if (!empty($_REQUEST['contno'])) {
-  //echo $_REQUEST['contno'];
-  //echo $_REQUEST['AssigneeEmpID'];
-  //$conn = connectDB_BigHead();
+if (!empty($_REQUEST['refno'])) {
+  /*
+  $sql = "EXEC Bighead_Mobile.[dbo].usp_TSR_Contract_ChangeToNormal
+  @ContNo = N'".$_REQUEST['contno']."' , @RefNo = N'".$_REQUEST['refno']."'";
+  */
+  $sql = "
+      Declare @ContNo varchar(10)
+      Declare @RefNo varchar(80)
+      Declare @Status varchar(10)
+      Declare @User varchar(10)
+      Declare @isActive int
 
+      set @ContNo = '".$_REQUEST['contno']."'
+      set @RefNo= '".$_REQUEST['refno']."'
+      set @User= '".$_COOKIE['tsr_emp_id']."'
 
-  $sql = "EXEC [dbo].usp_TSR_Contract_ChangeToNormal
-  @ContNo = N'".$_REQUEST['contno']."'";
+      SELECT  @isActive = isActive FROM Bighead_Mobile.dbo.Contract WHERE  CONTNO = @ContNo AND RefNo = @RefNo
 
-  //echo $sql;
+      IF (@isActive = 1)
+      BEGIN
+      UPDATE Bighead_Mobile.dbo.Contract SET isActive = 0 WHERE RefNo = @RefNo
+      END
+      ELSE
+      BEGIN
+      UPDATE Bighead_Mobile.dbo.Contract SET isActive = 1 WHERE RefNo = @RefNo
+      END
+
+      INSERT INTO TSRData_Source.dbo.TSSM_Log_UpdateContractIsActive (UserUpdate,DateUpdate,RefNo,OldDataIsActive) VALUES (@User,GETDATE(),@RefNo,@isActive)
+      ";
 
   $conn = connectDB_BigHead();
   $stmt1 = sqlsrv_query( $conn, $sql );
@@ -33,6 +52,7 @@ if (!empty($_REQUEST['contno'])) {
        die( print_r( sqlsrv_errors(), true));
   }
   sqlsrv_close($conn);
+
 }
  ?>
   <!-- Content Wrapper. Contains page content -->
@@ -91,24 +111,25 @@ if (!empty($_REQUEST['contno'])) {
             if ((isset($_REQUEST['searchText']))) {
           ?>
           <div class="box-body table-responsive no-padding">
-            <form role="form" data-toggle="validator"name="formupdate" method="post" action="index.php?pages=chackContnoBighead">
+            <!--<form role="form" data-toggle="validator"name="formupdate" method="post" action="index.php?pages=chackContnoBighead">-->
             <table class="table table-hover table-striped">
               <tr>
                 <th style="text-align: center">เลขที่สัญญา</th>
                 <th style="text-align: center">เลขที่อ้างอิง</th>
+                <th style="text-align: center">เลขเครื่อง</th>
                 <th>ชื่อลูกค้า</th>
                 <th>สถานะสัญญา</th>
                 <th>เขตเก็บเงิน</th>
                 <th>พนักงานเก็บเงิน</th>
                 <th>สถานะ</th>
-                <th>เปลี่ยนสถานะเป็น (N)</th>
+                <th>เปลี่ยนสถานะเป็น</th>
               </tr>
 
               <?php
                 $conn = connectDB_BigHead();
                 $sql_case = "SELECT RefNo,CONTNO,STATUS,isActive,SERVICE,CustomerName,EmployeeName
-                ,co.ContractReferenceNo AS ContRefno
-                ,case when len(co.RefNo) > 9 then 'B' else 'R' end as colorStatus
+                ,co.ContractReferenceNo AS ContRefno,ProductSerialNumber
+                ,CASE WHEN isMigrate = 0 then 'B' WHEN isMigrate = 1 AND LEN(co.RefNo) > 20 THEN 'M' ELSE 'R' END as colorStatus
                 FROM [Bighead_Mobile].[dbo].[Contract] AS Co WITH(NOLOCK)
                 LEFT JOIN TSRData_Source.dbo.vw_DebtorCustomer AS Dc WITH(NOLOCK)
                 ON Co.CustomerID = Dc.CustomerID
@@ -131,18 +152,32 @@ if (!empty($_REQUEST['contno'])) {
                     ?>
                     <td style="text-align: center"><p class="text-primary"><?=$row['ContRefno']?></p></td>
                     <?php
+                  }else if($row['colorStatus'] == 'M'){
+                    ?>
+                  <td style="text-align: center"><p class="text-success"><?=$row['ContRefno']?></p></td>
+                  <?PHP
                   }else {
                     ?>
                   <td style="text-align: center"><p class="text-danger"><?=$row['ContRefno']?></p></td>
                   <?PHP
                   }
                  ?>
+                  <td style="text-align: center"><?=$row['ProductSerialNumber']?></td>
                   <td><?=$row['CustomerName']?></td>
                   <td><?=$row['STATUS']?></td>
                   <td><?=$row['SERVICE']?></td>
                   <td><?=$row['EmployeeName']?></td>
                   <td><?php if (($row['isActive'] == "1") || ($row['isActive'] == true)){echo "ใช้งาน";}else{echo "ไม่ใช้งาน";};?></td>
-                  <td style="text-align: center"><input type="hidden" name="contno" value="<?=$row['CONTNO'];?>"><button type="summit" class="btn btn-block btn-danger">แก้ไขสถานะสัญญา</button></td>
+                  <!--
+                  <td style="text-align: center">
+                    <input type="hidden" name="contno" value="<?=$row['CONTNO'];?>">
+                    <input type="hidden" name="refno" value="<?=$row['RefNo'];?>">
+                    <button type="summit" class="btn btn-block btn-danger"><?php if (($row['isActive'] == "1") || ($row['isActive'] == true)){echo "ไม่ใช้งาน";}else{echo "ใช้งาน";};?></button>
+                  </td>
+                -->
+                  <td>
+                    <a href="index.php?pages=chackContnoBighead&refno=<?=$row['RefNo'];?>&searchText=<?=$row['CONTNO'];?>&contno=<?=$row['CONTNO'];?>" class="btn btn-block btn-danger" role="button"><?php if (($row['isActive'] == "1") || ($row['isActive'] == true)){echo "ไม่ใช้งาน";}else{echo "ใช้งาน";};?></a>
+                  </td>
                 </tr>
                 <?php
                   }
@@ -151,7 +186,7 @@ if (!empty($_REQUEST['contno'])) {
 
 
             </table>
-          </form>
+          <!--</form>-->
           </div>
           <?php
               }

@@ -1,6 +1,7 @@
 <?php
 ini_set('display_errors', 'on');
 ini_set('error_reporting', E_ALL);
+/*
 $limit_per_page = 100;
 $page = (isset($_GET['page'])) ? intval($_GET['page']) : 1;
 $limit_start = (($page - 1) * $limit_per_page) + 1;
@@ -14,7 +15,7 @@ if (empty($_REQUEST['yearPark'])) {
   $selectYear = $sprit[1];
   $selectPak = $sprit[0];
 }
-
+*/
  ?>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -33,43 +34,6 @@ if (empty($_REQUEST['yearPark'])) {
     <!-- Main content -->
     <section class="content">
       <div class="row">
-        <form role="form" data-toggle="validator" id="formSearchLog" name="formSearchLog" method="post" action="index.php?pages=monitordata1">
-
-        <div class="col-md-3">
-        </div>
-
-        <div class="col-md-6">
-          <label> กรุณาเลือกปักษ์ </label>
-          <div class="input-group input-group-sm">
-            <select class="form-control select2 input-group-sm" name="yearPark" id="yearPark">
-              <optgroup label="เลือกปักษ์">
-                <?php
-                  $conn = connectDB_HR();
-                  $sql = "SELECT Fortnight_no , Fortnight_year, Fortnight_year+543 as yearSale , CONVERT(varchar,dateadd(yy,543,mindate),105) as MinDate ,CONVERT(varchar,dateadd(yy,543,MaxDate),105) as  MaxDate FROM TSR_Application.dbo.view_Fortnight_Table2 ORDER BY Fortnight_year,Fortnight_no";
-                  //echo $sql;
-                  $stmt = sqlsrv_query( $conn, $sql );
-                  while ($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
-                ?>
-                  <option value="<?=$row['Fortnight_no']."_".$row['Fortnight_year'];?>" <?php if(($selectPak == $row['Fortnight_no']) && ($selectYear == $row['Fortnight_year'])) { echo "selected"; } ?>>ปี พ.ศ.<?=$row['yearSale'];?> / ปักษ์ที่ <?=$row['Fortnight_no'];?> ระหว่างวันที่ <?=$row['MinDate'];?> - <?=$row['MaxDate'];?></option>
-                <?php
-                    }
-                    sqlsrv_close($conn);
-                ?>
-              </optgroup>
-            </select>
-            <div class="input-group-btn">
-              <button type="summit" class="btn btn-block btn-primary">ค้นหา</button>
-            </div>
-          </div>
-
-        </div>
-        <div class="col-md-3">
-
-        </div>
-        </form>
-      </div>
-    </BR>
-      <div class="row">
 
         <div class="col-md-9">
           <div class="box box-info">
@@ -83,7 +47,8 @@ if (empty($_REQUEST['yearPark'])) {
               </div>
             </div>
           <div class="box-body table-responsive no-padding">
-            <table class="table table-hover table-striped">
+            <table id="example2" class="table table-hover table-striped">
+              <thead>
               <tr>
                 <th rowspan="2" style="text-align: center">ลำดับ</th>
                 <th colspan="5" style="text-align: center">RedHouse Data</th>
@@ -91,31 +56,46 @@ if (empty($_REQUEST['yearPark'])) {
               </tr>
               <tr>
                 <th>เลขที่สัญญา</th>
+                <th>เลขที่อ้างอิง</th>
                 <th>งวดที่</th>
                 <th>จำนวนเงิน</th>
                 <th>รหัสพนักงานขาย</th>
-                <th>วันที่</th>
                 <th>เลขที่สัญญา</th>
+                <th>เลขที่อ้างอิง</th>
                 <th>งวดที่</th>
                 <th>จำนวนเงิน</th>
                 <th>รหัสพนักงานขาย</th>
-                <th>วันที่</th>
               </tr>
+              </thead>
+              <tbody>
               <?php
-              $conn = connectDB_TSR();
-              $sql_case = "SELECT row_number() OVER (ORDER BY c.effdate ASC) AS rownum,c.CONTNO AS ContNo_RedHouse,c.MODE as Mode_RedHouse,c.PREMIUM as Premium_RedHouse,c.SALECODE as SaleCode_RedHouse,case when datepart(YEAR,c.effdate) > 2300 then CONVERT(varchar,dateadd(YEAR,-543,c.effdate),105) else CONVERT(varchar,c.effdate,105) end as times_RedHouse
-              ,b.CONTNO AS ContNo_BigHead ,b.MODE as Mode_BigHead,PAYAMT AS Premium_BigHead,b.SALECODE as SaleCode_BigHead,CONVERT(varchar,b.effdate,105)
-              as times_BigHead,case when b.CONTNO IS NULL then '1' else '0' end as error
-              from [TSRDATA].[dbo].[MastCont] as c left join [TSR_Application].[dbo].[view_Fortnight_Table2] as f on c.effdate between dateadd(yy,543,f.mindate) and dateadd(yy,543,f.maxdate) left join [TSS_PRD].[Bighead_Mobile].[dbo].[Contract] as b on c.RefNo = b.RefNo AND (b.effdate between f.mindate and f.maxdate) left join [TSS_PRD].[Bighead_Mobile].[dbo].[Payment] as p ON c.RefNo = p.RefNo AND (p.PayDate BETWEEN f.mindate and f.maxdate)
-              where f.Fortnight_year = $selectYear AND f.Fortnight_no = $selectPak AND c.STATUS IN ('N','R','L') AND c.TYPE NOT IN ('X','?')";
+              $conn = connectDB_BigHead();
+              $sql_case = "SELECT
+DISTINCT MC.CONTNO AS RContno,MC.RefNo AS Rrefno,MC.SALECODE as Rsalecode,MC.PAYPERIOD,MC.PREMIUM
+,C.bcontno as bcontno,C.ContractReferenceNo,C.bsalecode as bsalecode
+,(SELECT TOP 1 PaymentPeriodNumber FROM [Bighead_Mobile].[dbo].SalePaymentPeriod WHERE C.refno = refno AND PaymentComplete = 1 ORDER BY PaymentPeriodNumber DESC) AS PaymentPeriodNumber
+,(SELECT TOP 1 NetAmount FROM [Bighead_Mobile].[dbo].SalePaymentPeriod WHERE C.refno = refno AND PaymentComplete = 1) AS NetAmount
+,case when MC.CONTNO IS NULL then '1' else '0' end as error
+FROM (
+SELECT
+DISTINCT MC.CONTNO,MC.RefNo,MC.SALECODE,MC.PAYPERIOD,MC.PREMIUM,MC.SERIALNO
+FROM LINK_STOCK.[TSRDATA].[dbo].[MastCont] AS MC
+WHERE Mc.STATUS IN ('N','R','L') AND MC.TYPE NOT IN ('X','?') AND (DATEPART(YEAR,MC.effdate) = '2560' OR DATEPART(YEAR,MC.effdate) = '2561' ))
+AS MC
+FULL OUTER JOIN (
+SELECT
+DISTINCT C.CONTNO as bcontno,C.ContractReferenceNo,C.RefNo,C.salecode as bsalecode
+FROM [Bighead_Mobile].[dbo].[Contract] AS C
+LEFT JOIN [Bighead_Mobile].[dbo].SalePaymentPeriod AS SP ON C.refno = SP.refno
+WHERE C.isactive = 1 AND C.STATUS IN ('NORMAL') AND (DATEPART(YEAR,C.EFFDATE) = '2017' OR DATEPART(YEAR,C.EFFDATE) = '2018'))
+AS C ON MC.refno = C.ContractReferenceNo
+WHERE (C.bcontno IS NULL OR MC.CONTNO IS NULL)
+";
 
               //echo $sql_case;
-              $num_row = checkNumRow($conn,$sql_case);
-
-              $sql = "SELECT TOP $limit_per_page * FROM (".$sql_case." )AS CAMPAIGN WHERE (rownum >= '".$limit_start."' AND rownum <= '".$limit_end."')   order by CAMPAIGN.rownum";
-
-              $stmt = sqlsrv_query($conn,$sql);
-
+              //$num_row = checkNumRow($conn,$sql_case);
+              $stmt = sqlsrv_query($conn,$sql_case);
+              $i = 1;
               while ($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)) {
                 if ($row['error'] == "1") {
                     $styText = "style=\"color:red;\"";
@@ -125,36 +105,42 @@ if (empty($_REQUEST['yearPark'])) {
 
               ?>
               <tr <?=$styText?>>
-                <td style="text-align: center;"><?=$row['rownum']?></td>
-                <td><?=$row['ContNo_RedHouse']?></td>
-                <td><?=$row['Mode_RedHouse']?></td>
-                <td><?=number_format($row['Premium_RedHouse'])?></td>
-                <td><?=$row['SaleCode_RedHouse']?></td>
-                <td><?=DateThai($row['times_RedHouse'])?></td>
+                <td style="text-align: center;"><?=$i?></td>
+                <td><?=$row['RContno']?></td>
+                <td><?=$row['Rrefno']?></td>
+                <td><?=$row['PAYPERIOD']?></td>
+                <td><?=number_format($row['PREMIUM'])?></td>
+                <td><?=$row['Rsalecode']?></td>
 
-                <td><?php if (!empty($row['ContNo_BigHead'])) { echo $row['ContNo_BigHead'];}else{ echo "-";}?></td>
-                <td><?php if (!empty($row['Mode_BigHead'])) { echo $row['Mode_BigHead'];}else{ echo "-";}?></td>
-                <td><?php if (!empty($row['Premium_BigHead'])) { echo number_format($row['Premium_BigHead']);}else{ echo "-";}?></td>
-                <td><?php if (!empty($row['SaleCode_BigHead'])) { echo $row['SaleCode_BigHead'];}else{ echo "-";}?></td>
-                <td title="...."><?php if (!empty($row['times_BigHead'])) { echo DateThai($row['times_BigHead']);}else{ echo "-";}?></td>
+                <td><?php if (!empty($row['bcontno'])) { echo $row['bcontno'];}else{ echo "-";}?></td>
+                <td><?php if (!empty($row['ContractReferenceNo'])) { echo $row['ContractReferenceNo'];}else{ echo "-";}?></td>
+                <td><?php if (!empty($row['PaymentPeriodNumber'])) { echo $row['PaymentPeriodNumber'];}else{ echo "-";}?></td>
+                <td><?php if (!empty($row['NetAmount'])) { echo number_format($row['NetAmount']);}else{ echo "-";}?></td>
+                <td><?php if (!empty($row['bsalecode'])) { echo $row['bsalecode'];}else{ echo "-";}?></td>
+
               </tr>
               <?php
+               $i++;
                 }
                ?>
+             </tbody>
+             <tfoot>
+             </tfoot>
             </table>
           </div>
           <?php
           //if (isset($startDate) || isset($endDate)) {
-           echo pagelimit($_GET['pages'],$num_row,$page,$sql,"","","");
+          // echo pagelimit($_GET['pages'],$num_row,$page,$sql,"","","");
           //}
 
           ?>
         </div>
         </div>
+
         <div class="col-md-3">
           <div class="box box-info">
             <div class="box-header with-border">
-              <h3 class="box-title"> ข้อมูลรวม ปี <?php echo $selectYear+543;?></h3>
+              <h3 class="box-title"> ข้อมูลรวม</h3>
 
               <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -162,7 +148,7 @@ if (empty($_REQUEST['yearPark'])) {
                 <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
               </div>
             </div>
-          <div class="box-body table-responsive no-padding">
+          <div class="box-body">
             <table class="table table-hover table-striped">
               <!--
               <tr>
@@ -173,8 +159,11 @@ if (empty($_REQUEST['yearPark'])) {
               </tr>
             -->
               <?php
-              $conn = connectDB_TSR();
-              $sql_case = "SELECT COUNT(EFFDATE) AS Num from TSRDATA.dbo.MastCont as c left join TSR_Application.dbo.view_Fortnight_Table2 as f on c.effdate between DateAdd(year,+543,F.MinDate) AND DateAdd(year,+543,F.MaxDate) where f.Fortnight_year = $selectYear AND STATUS IN ('N','R','L') AND TYPE NOT IN ('X','?')";
+              $conn = connectDB_BigHead();
+              $sql_case = "SELECT COUNT(DISTINCT  CONTNO) AS Num
+FROM [Bighead_Mobile].[dbo].[Contract] AS C
+LEFT JOIN [Bighead_Mobile].[dbo].SalePaymentPeriod AS SP ON C.refno = SP.refno
+WHERE C.isactive = 1 AND C.STATUS IN ('NORMAL') AND (DATEPART(YEAR,C.EFFDATE) = '2017' OR DATEPART(YEAR,C.EFFDATE) = '2018')";
 
               $stmt = sqlsrv_query($conn,$sql_case);
 
@@ -189,8 +178,10 @@ if (empty($_REQUEST['yearPark'])) {
                 }
                ?>
                <?php
-               $conn = connectDB_TSR();
-               $sql_case = "SELECT COUNT(EFFDATE) AS Num FROM TSS_PRD.Bighead_Mobile.dbo.Contract";
+               $conn = connectDB_BigHead();
+               $sql_case = "SELECT COUNT(DISTINCT  CONTNO) AS Num
+FROM LINK_STOCK.[TSRDATA].[dbo].[MastCont] AS MC
+WHERE Mc.STATUS IN ('N','R','L') AND MC.TYPE NOT IN ('X','?') AND (DATEPART(YEAR,MC.effdate) = '2560' OR DATEPART(YEAR,MC.effdate) = '2561' )";
 
                $stmt = sqlsrv_query($conn,$sql_case);
 
@@ -222,7 +213,25 @@ if (empty($_REQUEST['yearPark'])) {
         </div>
       </div>
 
+
     </section>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
+  <link rel="stylesheet" href="plugins/datatables/dataTables.bootstrap.css">
+  <script src="plugins/datatables/jquery.dataTables.min.js"></script>
+  <script src="plugins/datatables/dataTables.bootstrap.min.js"></script>
+  <script>
+    $(function () {
+      $("#example1").DataTable();
+      $('#example2').DataTable({
+        "pageLength": 20,
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": false,
+        "autoWidth": false
+      });
+    });
+  </script>
