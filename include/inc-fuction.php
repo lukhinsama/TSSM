@@ -46,8 +46,38 @@ function connectDB_BigHead(){
 
 	$db_host='bof.thiensurat.co.th';
 	$db_name='Bighead_Mobile';
+	$db_username='tssm';
+	$db_password='KSDO$Dxf8';
+	//$db_username='TsrApp';
+	//$db_password='6z3sNrCzWp';
+	//$db_username='AppTsr';
+	//$db_password='8e9sNruRsW';
+	//$db_username='adisorn.c';
+	//$db_password=']^dsbo8iy[';
+
+	$connectionInfo = array("Database"=>$db_name, "UID"=>$db_username, "PWD"=>$db_password, 'CharacterSet' => 'UTF-8', "MultipleActiveResultSets"=>true);
+  $conn = sqlsrv_connect( $db_host, $connectionInfo);
+
+	if( $conn === false ) {
+    die( print_r( sqlsrv_errors(), true));
+	}
+
+	return $conn;
+}
+
+
+function connectDB_BigHeadUAT(){
+	//config DB
+	//$db_host='203.150.54.248';
+	//$db_host='192.168.110.133';
+	//$db_host='203.154.204.241';
+
+	$db_host='192.168.111.138';
+	$db_name='Bighead_Mobile';
 	$db_username='TsrApp';
 	$db_password='6z3sNrCzWp';
+	//$db_username='AppTsr';
+	//$db_password='8e9sNruRsW';
 	//$db_username='adisorn.c';
 	//$db_password=']^dsbo8iy[';
 
@@ -232,6 +262,20 @@ function sidemenu($pages,$position){
 					$menu = "class=\"treeview\"";
 				}
 					break;
+			case "monitorReceiptBle":
+				if ($position == 2) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "monitorContractCrdTele":
+				if ($position == 2) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
 			case "sorting":
 				if ($position == 3) {
 					$menu = "class=\"active treeview\"";
@@ -353,6 +397,104 @@ function sidemenu($pages,$position){
 					break;
 			case "reportsale9":
 				if ($position == 1) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportsale10":
+				if ($position == 1) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportsale12":
+				if ($position == 1) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn1":
+				if ($position == 9) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn2":
+				if ($position == 9) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn3":
+				if ($position == 9) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn4":
+				if ($position == 9) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn5":
+				if ($position == 9) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn6":
+				if ($position == 9) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn7":
+				if ($position == 9) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn8":
+				if ($position == 9) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn9":
+				if ($position == 9) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn10":
+				if ($position == 9) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn12":
+				if ($position == 9) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportoper17":
+				if ($position == 9) {
 					$menu = "class=\"active treeview\"";
 				}else {
 					$menu = "class=\"treeview\"";
@@ -519,6 +661,20 @@ function sidemenu($pages,$position){
 					$menu = "class=\"treeview\"";
 				}
 					break;
+			case "reportoper15":
+				if ($position == 6) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportoper16":
+				if ($position == 6) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
 			case "reportdept1":
 				if ($position == 5) {
 					$menu = "class=\"active treeview\"";
@@ -617,7 +773,181 @@ function sidemenu($pages,$position){
 					$menu = "class=\"treeview\"";
 				}
 					break;
-
+				case "updatepackage":
+					if ($position == 8) {
+						$menu = "class=\"active treeview\"";
+					}else {
+						$menu = "class=\"treeview\"";
+					}
+						break;
+			case "changeReceiptPeriod":
+				if ($position == 8) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "receiptComeBack":
+				if ($position == 8) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "updateReceiptTable":
+				if ($position == 8) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportReceiptSendMail":
+				if ($position == 8) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportcrd2_bak":
+				if ($position == 10) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportcrd2":
+				if ($position == 10) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportcrd5":
+				if ($position == 10) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reporttele2":
+				if ($position == 11) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reporttele5":
+				if ($position == 11) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportinstall5":
+				if ($position == 12) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportOperPrintReceipt":
+				if ($position == 8) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportfa5":
+				if ($position == 13) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reuseproduct":
+				if ($position == 8) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reporton1":
+				if ($position == 14) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reporton2":
+				if ($position == 14) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reporton3":
+				if ($position == 14) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "monitor_contract":
+				if ($position == 8) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "contractedit":
+				if ($position == 8) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "editReceiptManual":
+				if ($position == 8) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportReprint2":
+				if ($position == 4) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportdueturndate":
+				if ($position == 8) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportib3":
+				if ($position == 15) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn5_test":
+				if ($position == 15) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportfa1":
+				if ($position == 13) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
 	    default:
 				if ($position == 0) {
 					$menu = "class=\"active treeview\"";
@@ -756,6 +1086,90 @@ function sidemenu3($pages,$position){
 					$menu = "class=\"treeview\"";
 				}
 					break;
+			case "reportsale10":
+				if ($position == 11) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportsale12":
+				if ($position == 11) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn1":
+				if ($position == 91) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn2":
+				if ($position == 91) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn3":
+				if ($position == 91) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn4":
+				if ($position == 91) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn7":
+				if ($position == 91) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn8":
+				if ($position == 91) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn9":
+				if ($position == 91) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn10":
+				if ($position == 91) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+				break;
+			case "reportbrn12":
+				if ($position == 91) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+				break;
+			case "reportoper17":
+				if ($position == 91) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
 			case "reportsale":
 				if ($position == 11) {
 					$menu = "class=\"active treeview\"";
@@ -798,7 +1212,90 @@ function sidemenu3($pages,$position){
 					$menu = "class=\"treeview\"";
 				}
 					break;
-
+			case "updatepackage":
+				if ($position == 84) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "changeReceiptPeriod":
+				if ($position == 85) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "receiptComeBack":
+				if ($position == 86) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "updateReceiptTable":
+				if ($position == 87) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportReceiptSendMail":
+				if ($position == 8010) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportcrd2_bak":
+				if ($position == 103) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportcrd2":
+				if ($position == 101) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reporttele2":
+				if ($position == 1101) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportOperPrintReceipt":
+				if ($position == 88) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reporton1":
+				if ($position == 1401) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reporton2":
+				if ($position == 1401) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportReprint2":
+				if ($position == 415) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
 	    default:
 				if ($position == 0) {
 					$menu = "class=\"active treeview\"";
@@ -827,6 +1324,20 @@ function sidemenu2($pages,$position){
 					break;
 			case "monitorReportCredit1":
 				if ($position == 213) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "monitorReceiptBle":
+				if ($position == 222) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "monitorContractCrdTele":
+				if ($position == 223) {
 					$menu = "class=\"active\"";
 				}else {
 					$menu = "";
@@ -946,6 +1457,97 @@ function sidemenu2($pages,$position){
 					break;
 			case "reportsale9":
 				if ($position == 118) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportsale10":
+				if ($position == 119) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportsale12":
+				if ($position == 1110) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportbrn1":
+				if ($position == 911) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportbrn2":
+				if ($position == 912) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportbrn3":
+				if ($position == 913) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportbrn4":
+				if ($position == 914) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportbrn5":
+				if ($position == 93) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportbrn7":
+				if ($position == 916) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportbrn8":
+				if ($position == 917) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportbrn9":
+				if ($position == 918) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportbrn10":
+				if ($position == 919) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+				break;
+			case "reportbrn12":
+				if ($position == 919) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+				break;
+			case "reportoper17":
+				if ($position == 9110) {
 					$menu = "class=\"active\"";
 				}else {
 					$menu = "";
@@ -1112,6 +1714,20 @@ function sidemenu2($pages,$position){
 					$menu = "";
 				}
 					break;
+			case "reportoper15":
+				if ($position == 6110) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportoper16":
+				if ($position == 6111) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
 			case "reportdept1":
 				if ($position == 51) {
 					$menu = "class=\"active\"";
@@ -1205,6 +1821,181 @@ function sidemenu2($pages,$position){
 					break;
 			case "reprotSendCard1":
 				if ($position == 822) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "updatepackage":
+				if ($position == 84) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "changeReceiptPeriod":
+				if ($position == 85) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "receiptComeBack":
+				if ($position == 86) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "updateReceiptTable":
+				if ($position == 87) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportReceiptSendMail":
+				if ($position == 8010) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportcrd2_bak":
+				if ($position == 103) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportcrd2":
+				if ($position == 101) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportcrd5":
+				if ($position == 102) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reporttele2":
+				if ($position == 1101) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reporttele5":
+				if ($position == 1102) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportinstall5":
+				if ($position == 1202) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportOperPrintReceipt":
+				if ($position == 88) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reportfa5":
+				if ($position == 1302) {
+					$menu = "class=\"active\"";
+				}else {
+					$menu = "";
+				}
+					break;
+			case "reuseproduct":
+				if ($position == 8011) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reporton1":
+				if ($position == 1401) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reporton2":
+				if ($position == 1402) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reporton3":
+				if ($position == 1403) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportib3":
+				if ($position == 1503) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "monitor_contract":
+				if ($position == 8012) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "contractedit":
+				if ($position == 8013) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "editReceiptManual":
+				if ($position == 8014) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportReprint2":
+				if ($position == 415) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportdueturndate":
+				if ($position == 8015) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportbrn5_test":
+				if ($position == 1504) {
+					$menu = "class=\"active treeview\"";
+				}else {
+					$menu = "class=\"treeview\"";
+				}
+					break;
+			case "reportfa1":
+				if ($position == 1301) {
 					$menu = "class=\"active\"";
 				}else {
 					$menu = "";
@@ -1797,4 +2588,110 @@ function SendMail($logLeaveID){
 
 }
 
+function ActiveSideMenu1($pages,$menuID){
+		switch ($pages) {
+			case 'chackContnoBighead':
+				if ($menuID == 1) {
+					$ActiveSideMenu = "class=\"active treeview\"";
+				} elseif ($menuID == 16) {
+					$ActiveSideMenu = "class=\"active treeview\"";
+				} else {
+					$ActiveSideMenu = "class=\"treeview\"";
+				}
+				break;
+			default :
+				$ActiveSideMenu = "class='treeview'";
+				break;
+		}
+		 return $ActiveSideMenu;
+}
+
+function ActiveSideMenu2($pages,$menuID){
+		switch ($pages) {
+			case 'chackContnoBighead':
+				if ($menuID == 18) {
+					$ActiveSideMenu = "class=\"active\"";
+				}else {
+					$ActiveSideMenu = "";
+				}
+				break;
+			default :
+				$ActiveSideMenu = "";
+				break;
+		}
+		 return $ActiveSideMenu;
+}
+
+function ConvertEmpIDInsertA($EmpID){
+	if (substr($EmpID,0,1) === "A") {
+		$EmpIDS = $EmpID;
+	}else {
+		$EmpIDS = "A".substr($EmpID,1,5);
+	}
+	 return $EmpIDS;
+}
+
+function PrintButton($id,$type,$rpt,$tsr_emp_permit){
+	if (($tsr_emp_permit == 1) || ($tsr_emp_permit == 2) || ($tsr_emp_permit == 5) || ($tsr_emp_permit == 6) || ($tsr_emp_permit == 7) || ($tsr_emp_permit == 9) || ($tsr_emp_permit == 10) || ($tsr_emp_permit == 17)) {
+		$button = "<a href=\"http://app.thiensurat.co.th/lkh/rpt.aspx?id=$id&type=$type&rpt=$rpt\" target=\"_blank\" class=\"btn btn-default\"> <i class=\"fa fa-print\"></i> </a>";
+	}else {
+		$button = "";
+	}
+	 return $button;
+}
+
+function num2wordsThai($num){
+    $num=str_replace(",","",$num);
+    $num_decimal=explode(".",$num);
+    $num=$num_decimal[0];
+    $returnNumWord="";
+    $lenNumber=strlen($num);
+    $lenNumber2=$lenNumber-1;
+    $kaGroup=array("","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน");
+    $kaDigit=array("","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ต","แปด","เก้า");
+    $kaDigitDecimal=array("ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ต","แปด","เก้า");
+    $ii=0;
+    for($i=$lenNumber2;$i>=0;$i--){
+        $kaNumWord[$i]=substr($num,$ii,1);
+        $ii++;
+    }
+    $ii=0;
+    for($i=$lenNumber2;$i>=0;$i--){
+        if(($kaNumWord[$i]==2 && $i==1) || ($kaNumWord[$i]==2 && $i==7)){
+            $kaDigit[$kaNumWord[$i]]="ยี่";
+        }else{
+            if($kaNumWord[$i]==2){
+                $kaDigit[$kaNumWord[$i]]="สอง";
+            }
+            if(($kaNumWord[$i]==1 && $i<=2 && $i==0) || ($kaNumWord[$i]==1 && $lenNumber>6 && $i==6)){
+                if($kaNumWord[$i+1]==0){
+                    $kaDigit[$kaNumWord[$i]]="หนึ่ง";
+                }else{
+                    $kaDigit[$kaNumWord[$i]]="เอ็ด";
+                }
+            }elseif(($kaNumWord[$i]==1 && $i<=2 && $i==1) || ($kaNumWord[$i]==1 && $lenNumber>6 && $i==7)){
+                $kaDigit[$kaNumWord[$i]]="";
+            }else{
+                if($kaNumWord[$i]==1){
+                    $kaDigit[$kaNumWord[$i]]="หนึ่ง";
+                }
+            }
+        }
+        if($kaNumWord[$i]==0){
+            if($i!=6){
+                $kaGroup[$i]="";
+            }
+        }
+        $kaNumWord[$i]=substr($num,$ii,1);
+        $ii++;
+        $returnNumWord.=$kaDigit[$kaNumWord[$i]].$kaGroup[$i];
+    }
+    if(isset($num_decimal[1])){
+        $returnNumWord.="จุด";
+        for($i=0;$i<strlen($num_decimal[1]);$i++){
+                $returnNumWord.=$kaDigitDecimal[substr($num_decimal[1],$i,1)];
+        }
+    }
+    return $returnNumWord;
+}
 ?>

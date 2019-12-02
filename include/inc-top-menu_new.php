@@ -66,10 +66,9 @@
           <ul class="dropdown-menu">
             <!-- User image -->
             <li class="user-header">
-
-              <p>
-                <?=$_COOKIE['tsr_emp_id']?> - <?=$_COOKIE['tsr_emp_name']?> - <?=$_COOKIE['tsr_emp_permit']?>
-              </p>
+              <P align = "center">
+                รหัสพนักงาน : <?=$_COOKIE['tsr_emp_id']?></BR>ชื่อ : <?=$_COOKIE['tsr_emp_name']?></BR>(<?=$_COOKIE['tsr_emp_permit_name']?>)
+              </P>
             </li>
             <!-- Menu Body -->
             <li class="user-body">
